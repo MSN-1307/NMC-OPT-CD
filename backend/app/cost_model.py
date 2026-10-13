@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional,Tuple
 from app.schemas import (
     CostModelParameters,
     KernelAnalysisFacts,
