@@ -18,6 +18,8 @@ Near-Memory Computing (NMC) and Processing-In-Memory (PIM) paradigms mitigate th
 
 The workbench is organized into modular functional subsystems that mirror a production compiler target-selection pipeline.
 
+![Fig. 1. Architectural Overview of the NMC-Opt Studio Framework](docs/architecture_diagram.png)
+
 ```
 +-----------------------------------------------------------------------------------------+
 |                        USER INTERFACE & WORKSPACE ENVIRONMENT                           |
