@@ -5,7 +5,7 @@
 
 ---
 
-## 🌟 Key Features
+## Key Features
 
 1. **Home Navigation Hub (`HomeView`):**
    - High-impact landing page guiding you to all modules, quick-start workflow, and educational explainers on the "Memory Wall".
@@ -40,7 +40,7 @@
 
 ---
 
-## 🚀 Getting Started on Windows
+## Getting Started on Windows
 
 ### Prerequisites
 - **Python 3.10+** (Python 3.14+ supported)
@@ -74,11 +74,11 @@ npm run dev
 ```
 
 Open your browser at:  
-👉 **`http://localhost:5173`**
+**`http://localhost:5173`**
 
 ---
 
-## 🧪 Running Automated Tests
+## Running Automated Tests
 
 To run the backend unit tests for kernel analysis, cost formulas, and optimization decisions:
 
@@ -95,7 +95,7 @@ npm run build
 
 ---
 
-## 📜 Citations and Research Context
+## Citations and Research Context
 1. **IMTP: Search-based Code Generation for In-memory Tensor Programs**  
    Yongwon Shin, Dookyung Kang, Hyojin Sung (arXiv:2412.19630, 2024).
 2. **Near-Memory Computing: Past, Present, and Future**  
