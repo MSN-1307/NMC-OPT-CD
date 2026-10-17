@@ -446,13 +446,20 @@ void elementwise_mul(const float* A, const float* B, float* C, int N) {
 The theoretical and analytical formulations embodied within NMC-Opt Studio draw upon foundational literature in computer architecture, memory-centric systems, and compiler design:
 
 1. **IMTP: Search-based Code Generation for In-memory Tensor Programs**  
-   Yongwon Shin, Dookyung Kang, Hyojin Sung. *arXiv:2412.19630*, 2024.
-2. **Near-Memory Computing: Past, Present, and Future**  
-   G. Singh, L. Chelini, S. Corda, N. Akay, F. A. Oliveira, P. C. Santos, G. Falcao, P. R. M. Ferreira. *Microprocessors and Microsystems*, vol. 71, 2019.
-3. **Computing with Near Data**  
-   X. Tang, M. T. Kandemir, H. Zhao, M. Jung, M. Karakoy. *ACM SIGMETRICS Performance Evaluation Review*, vol. 47, no. 1, 2019.
-4. **Roofline: An Insightful Visual Performance Model for Multicore Architectures**  
-   Samuel Williams, Andrew Waterman, David Patterson. *Communications of the ACM*, vol. 52, no. 4, pp. 65–76, 2009.
+   Yongwon Shin, Dookyung Kang, Hyojin Sung. *arXiv:2412.19630*, 2024.  
+   *Contribution to NMC-Opt:* Informs compiler-level host/device boundary partitioning, memory layout transformations across DRAM banks, and scratchpad tiling optimizations.
+2. **CAIRO: A Compiler-Assisted Technique for Enabling Instruction-Level Offloading of Processing-In-Memory**  
+   Ramyad Hadidi, Lifeng Nai, Hyojong Kim, Hyesoon Kim. *ACM Transactions on Architecture and Code Optimization (TACO)*, vol. 14, no. 4, Article 48, pp. 1–25, December 2017. DOI: 10.1145/3151030.  
+   *Contribution to NMC-Opt:* Establishes compiler-assisted analytical decision models for evaluating bandwidth savings, cache-miss-to-access ratios, and selective offloading rules that avoid performance degradation on non-beneficial workloads.
+3. **Near-Memory Computing: Past, Present, and Future**  
+   G. Singh, L. Chelini, S. Corda, N. Akay, F. A. Oliveira, P. C. Santos, G. Falcao, P. R. M. Ferreira. *Microprocessors and Microsystems*, vol. 71, 2019.  
+   *Contribution to NMC-Opt:* Provides taxonomy and analytical foundations for internal 2D/3D DRAM bank bandwidth scaling and hardware execution trade-offs.
+4. **Computing with Near Data**  
+   X. Tang, M. T. Kandemir, H. Zhao, M. Jung, M. Karakoy. *ACM SIGMETRICS Performance Evaluation Review*, vol. 47, no. 1, 2019.  
+   *Contribution to NMC-Opt:* Explores compiler-driven data movement minimization and trade-offs between data transfer and recomputation.
+5. **Roofline: An Insightful Visual Performance Model for Multicore Architectures**  
+   Samuel Williams, Andrew Waterman, David Patterson. *Communications of the ACM*, vol. 52, no. 4, pp. 65–76, 2009.  
+   *Contribution to NMC-Opt:* Defines the theoretical operational intensity bound (FLOP/Byte) used to classify memory-bandwidth-bound versus compute-bound execution regimes.
 
 ---
 
