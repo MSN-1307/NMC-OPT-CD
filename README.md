@@ -12,6 +12,16 @@ Near-Memory Computing (NMC) and Processing-In-Memory (PIM) paradigms mitigate th
 
 **NMC-Opt Studio** is an academic-grade compiler optimization workbench and analytical exploration platform. It treats off-chip data movement, interconnect link latencies, DRAM bank layouts, and data reorganization penalties as first-class constraints within the compiler optimization pipeline. The workbench profiles C source kernels, constructs a Static Single Assignment (SSA) Intermediate Representation (IR), computes fine-grained workload characteristics (such as Arithmetic Intensity in FLOP/Byte and memory access strides), evaluates an analytical first-principles cost model, and emits an automated target placement verdict comparing Host CPU execution against Near-Memory DPU offload.
 
+### Academic Manuscripts & Project Artifacts
+
+| Document | Description | Format & Scope | Direct Link |
+| :--- | :--- | :--- | :--- |
+| **Research Paper** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | 11-Page IEEE Format Manuscript | [NMC_OPT_Research_Paper.pdf](docs/NMC_OPT_Research_Paper.pdf) |
+| **Comprehensive Technical Report** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | 28-Page Complete Project Report | [NMC_OPT_Comprehensive_Report.pdf](docs/NMC_OPT_Comprehensive_Report.pdf) |
+| **Compiler Methodology** | *Compiler Analytical Cost Model & Target Placement Methodology* | Formal Mathematical Formulation | [NMC_Opt_Methodology_Document.pdf](docs/NMC_Opt_Methodology_Document.pdf) |
+| **Scientific Novelty** | *Scientific Novelty & Architectural Innovations* | Research Contributions & State-of-the-Art Audit | [NMC_Opt_Novelty_Document.pdf](docs/NMC_Opt_Novelty_Document.pdf) |
+| **Execution Guide** | *Installation, Configuration & Execution Guide* | Complete Local & CLI Operations Manual | [NMC_Opt_Execution_Guide.pdf](docs/NMC_Opt_Execution_Guide.pdf) |
+
 ---
 
 ## 2. SYSTEM ARCHITECTURE & COMPOSITION
