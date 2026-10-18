@@ -17,7 +17,7 @@ Near-Memory Computing (NMC) and Processing-In-Memory (PIM) paradigms mitigate th
 | Document | Description | Format & Scope | Direct Link |
 | :--- | :--- | :--- | :--- |
 | **IEEE Manuscript** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | 11-Page IEEE Format Manuscript | [NMC-OPT-Manuscript-IEEE.pdf](docs/NMC-OPT-Manuscript-IEEE.pdf) |
-| **Comprehensive Technical Report** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | 28-Page Complete Project Report | [NMC_OPT_Comprehensive_Report.pdf](docs/NMC_OPT_Comprehensive_Report.pdf) |
+| **Comprehensive Manuscript** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | 28-Page Complete Institutional Manuscript | [NMC-OPT-Manuscript.pdf](docs/NMC-OPT-Manuscript.pdf) |
 | **Compiler Methodology** | *Compiler Analytical Cost Model & Target Placement Methodology* | Formal Mathematical Formulation | [NMC_Opt_Methodology_Document.pdf](docs/NMC_Opt_Methodology_Document.pdf) |
 | **Scientific Novelty** | *Scientific Novelty & Architectural Innovations* | Research Contributions & State-of-the-Art Audit | [NMC_Opt_Novelty_Document.pdf](docs/NMC_Opt_Novelty_Document.pdf) |
 | **Execution Guide** | *Installation, Configuration & Execution Guide* | Complete Local & CLI Operations Manual | [NMC_Opt_Execution_Guide.pdf](docs/NMC_Opt_Execution_Guide.pdf) |
