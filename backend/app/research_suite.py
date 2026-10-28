@@ -232,31 +232,41 @@ class ResearchSuiteEngine:
             tf_sync = base_tf_sync * (params.sync_events * params.synchronization_overhead_ms / 0.01)
             tf_total = tf_compute + tf_transfer + tf_layout + tf_sync
 
+        c_comp = round(cpu_compute, 4)
+        c_xfer = round(cpu_transfer, 4)
         cpu_item = StrategyCostItem(
             strategy="CPU",
-            compute_ms=round(cpu_compute, 4),
-            transfer_ms=round(cpu_transfer, 4),
+            compute_ms=c_comp,
+            transfer_ms=c_xfer,
             layout_ms=0.0,
             sync_ms=0.0,
-            total_ms=round(cpu_total, 4)
+            total_ms=round(c_comp + c_xfer, 4)
         )
 
+        n_comp = round(nmc_compute, 4)
+        n_xfer = round(nmc_transfer, 4)
+        n_lay = round(nmc_layout, 4)
+        n_sync = round(nmc_sync, 4)
         nmc_item = StrategyCostItem(
             strategy="NMC",
-            compute_ms=round(nmc_compute, 4),
-            transfer_ms=round(nmc_transfer, 4),
-            layout_ms=round(nmc_layout, 4),
-            sync_ms=round(nmc_sync, 4),
-            total_ms=round(nmc_total, 4)
+            compute_ms=n_comp,
+            transfer_ms=n_xfer,
+            layout_ms=n_lay,
+            sync_ms=n_sync,
+            total_ms=round(n_comp + n_xfer + n_lay + n_sync, 4)
         )
 
+        t_comp = round(tf_compute, 4)
+        t_xfer = round(tf_transfer, 4)
+        t_lay = round(tf_layout, 4)
+        t_sync = round(tf_sync, 4)
         transform_item = StrategyCostItem(
             strategy="NMC + transform",
-            compute_ms=round(tf_compute, 4),
-            transfer_ms=round(tf_transfer, 4),
-            layout_ms=round(tf_layout, 4),
-            sync_ms=round(tf_sync, 4),
-            total_ms=round(tf_total, 4)
+            compute_ms=t_comp,
+            transfer_ms=t_xfer,
+            layout_ms=t_lay,
+            sync_ms=t_sync,
+            total_ms=round(t_comp + t_xfer + t_lay + t_sync, 4)
         )
 
         return {
@@ -508,19 +518,23 @@ class ResearchSuiteEngine:
             (1024, "16x64", 0.08, 0.22, 0.15, 0.13, True), # Optimal for 1024
             (1024, "32x32", 0.08, 0.22, 0.17, 0.14, False),
         ]
-        fig4c_512 = [
-            Fig4cItem(
+        fig4c_512 = []
+        for dpu, shape, h2d, k, d2h, hr, opt in raw_512:
+            h2d_s = round(h2d * link_scale, 3)
+            k_s = round(k * bw_scale, 3)
+            d2h_s = round(d2h * link_scale, 3)
+            hr_s = round(hr * cpu_scale, 3)
+            tot = round(h2d_s + k_s + d2h_s + hr_s, 3)
+            fig4c_512.append(Fig4cItem(
                 dpu_count=dpu,
                 tile_shape=shape,
-                h2d_ms=round(h2d * link_scale, 3),
-                kernel_ms=round(k * bw_scale, 3),
-                d2h_ms=round(d2h * link_scale, 3),
-                host_reduction_ms=round(hr * cpu_scale, 3),
-                total_ms=round((h2d * link_scale) + (k * bw_scale) + (d2h * link_scale) + (hr * cpu_scale), 3),
+                h2d_ms=h2d_s,
+                kernel_ms=k_s,
+                d2h_ms=d2h_s,
+                host_reduction_ms=hr_s,
+                total_ms=tot,
                 is_optimal=opt
-            )
-            for dpu, shape, h2d, k, d2h, hr, opt in raw_512
-        ]
+            ))
 
         raw_8192 = [
             (256, "4x64", 0.35, 14.5, 0.15, 0.20, True),
@@ -536,19 +550,23 @@ class ResearchSuiteEngine:
             (1024, "16x64", 0.35, 4.0, 0.32, 0.50, False),
             (1024, "32x32", 0.35, 4.2, 0.45, 0.80, False),
         ]
-        fig4c_8192 = [
-            Fig4cItem(
+        fig4c_8192 = []
+        for dpu, shape, h2d, k, d2h, hr, opt in raw_8192:
+            h2d_s = round(h2d * link_scale, 2)
+            k_s = round(k * bw_scale, 2)
+            d2h_s = round(d2h * link_scale, 2)
+            hr_s = round(hr * cpu_scale, 2)
+            tot = round(h2d_s + k_s + d2h_s + hr_s, 2)
+            fig4c_8192.append(Fig4cItem(
                 dpu_count=dpu,
                 tile_shape=shape,
-                h2d_ms=round(h2d * link_scale, 2),
-                kernel_ms=round(k * bw_scale, 2),
-                d2h_ms=round(d2h * link_scale, 2),
-                host_reduction_ms=round(hr * cpu_scale, 2),
-                total_ms=round((h2d * link_scale) + (k * bw_scale) + (d2h * link_scale) + (hr * cpu_scale), 2),
+                h2d_ms=h2d_s,
+                kernel_ms=k_s,
+                d2h_ms=d2h_s,
+                host_reduction_ms=hr_s,
+                total_ms=tot,
                 is_optimal=opt
-            )
-            for dpu, shape, h2d, k, d2h, hr, opt in raw_8192
-        ]
+            ))
 
         # -------------------------------------------------------------
         # Fig 9(a) and 9(b): Tensor operations normalized to PrIM

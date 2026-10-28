@@ -338,12 +338,28 @@ export const AnalysisExplanationModal: React.FC<AnalysisExplanationModalProps> =
 
                 <div className="p-4 rounded-xl bg-white border border-slate-300 shadow-2xs space-y-2">
                   <span className="font-bold text-teal-700 block">Optimal Strategy Math ({recommendation.strategy}):</span>
-                  <div className="font-mono bg-white p-2.5 rounded border border-teal-200 space-y-1 text-teal-950">
-                    <div>PIM Compute & Internal DRAM: {recommendation.estimated_cost_ms.toFixed(4)} ms</div>
-                    <div className="font-bold text-emerald-600 pt-1 border-t border-teal-100">
-                      Speedup: {recommendation.speedup_vs_cpu.toFixed(2)}x vs Host CPU
-                    </div>
-                  </div>
+                  {(() => {
+                    const winnerCand = candidates.find(c => c.strategy === recommendation.strategy) || candidates[1];
+                    const compMs = winnerCand?.components_ms.compute_ms || 0;
+                    const xferMs = winnerCand?.components_ms.memory_or_transfer_ms || 0;
+                    const layMs = winnerCand?.components_ms.layout_conversion_ms || 0;
+                    const syncOhMs = (winnerCand?.components_ms.synchronization_ms || 0) + (winnerCand?.components_ms.overhead_ms || 0);
+                    return (
+                      <div className="font-mono bg-white p-2.5 rounded border border-teal-200 space-y-1 text-teal-950">
+                        <div>Compute & Bank Mem: {compMs.toFixed(4)} ms</div>
+                        <div>Link Transfer: {xferMs.toFixed(4)} ms</div>
+                        {layMs > 0 && <div>Layout Conv: {layMs.toFixed(4)} ms</div>}
+                        <div>Sync & Overhead: {syncOhMs.toFixed(4)} ms</div>
+                        <div className="font-bold text-slate-900 pt-1 border-t border-teal-100 flex justify-between">
+                          <span>Total Latency:</span>
+                          <span>{recommendation.estimated_cost_ms.toFixed(4)} ms</span>
+                        </div>
+                        <div className="font-bold text-emerald-600 pt-0.5">
+                          Speedup: {recommendation.speedup_vs_cpu.toFixed(2)}x vs Host CPU
+                        </div>
+                      </div>
+                    );
+                  })()}
                   <p className="text-teal-900 text-[11px] leading-relaxed">
                     By computing directly adjacent to DRAM row buffers at {parameters.nmc_effective_bandwidth_gbps} GB/s, 
                     the massive internal memory bandwidth amortizes the one-time link transfer overhead, yielding a net speedup.

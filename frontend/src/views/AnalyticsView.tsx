@@ -51,6 +51,34 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   onOpenParameterModal,
   onNavigateWorkbench,
 }) => {
+  const CustomBreakdownTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const total = payload.reduce((sum: number, p: any) => sum + (Number(p.value) || 0), 0);
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-slate-200 text-xs">
+          <p className="font-bold text-slate-800 mb-1">{label}</p>
+          <div className="space-y-1">
+            {payload.map((p: any) => {
+              const val = Number(p.value) || 0;
+              const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0';
+              return (
+                <div key={p.dataKey} className="flex justify-between gap-4">
+                  <span style={{ color: p.color }} className="font-medium">{p.name}:</span>
+                  <span className="font-mono text-slate-700">{val.toFixed(4)} ms ({pct}%)</span>
+                </div>
+              );
+            })}
+            <div className="pt-1 mt-1 border-t border-slate-100 flex justify-between font-bold text-slate-900">
+              <span>Total Latency:</span>
+              <span className="font-mono text-teal-700">{total.toFixed(4)} ms</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   // Navigation tabs for the 8 graphs plus the cross-workload comparison
   const [activeChartTab, setActiveChartTab] = useState<
     'all_8' | 'graph1' | 'graph2' | 'graph3' | 'graph4' | 'graph5' | 'graph6' | 'graph7' | 'graph8' | 'cross_workloads'
@@ -175,13 +203,15 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   const linkSensitivityData = useMemo(() => {
     if (!analysisResult) return [];
     const facts = analysisResult.analysis;
-    const bytes = facts.total_bytes_moved;
-    const ops = facts.estimated_operations;
     const readBytes = facts.estimated_bytes_read;
     const writeBytes = facts.estimated_bytes_written;
-    const nmcComp = ops / ((parameters.nmc_compute_gflops || 32.0) * 1e6);
-    const nmcBank = bytes / ((parameters.nmc_effective_bandwidth_gbps || 160.0) * 1e6);
-    const fixedOh = (parameters.host_to_nmc_overhead_ms || 0.02) + (parameters.nmc_to_host_overhead_ms || 0.02) + 0.01;
+    const nmcCand = analysisResult.candidates.find(c => c.strategy === 'Direct NMC offload') || analysisResult.candidates[1];
+    const cpuCand = analysisResult.candidates.find(c => c.strategy === 'CPU-only') || analysisResult.candidates[0];
+
+    const compMs = nmcCand ? nmcCand.components_ms.compute_ms : 0;
+    const layoutMs = nmcCand ? nmcCand.components_ms.layout_conversion_ms : 0;
+    const syncOverheadMs = nmcCand ? (nmcCand.components_ms.synchronization_ms + nmcCand.components_ms.overhead_ms) : 0;
+    const cpuTotalMs = cpuCand ? cpuCand.estimated_total_ms : 1.0;
 
     const linkSpeeds = [
       { speed: 16, label: 'PCIe 4.0 x8 (16 GB/s)' },
@@ -191,17 +221,15 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       { speed: 128, label: 'CXL 3.0 (128 GB/s)' },
     ];
 
-    const cpuCost = (ops / ((parameters.cpu_compute_gflops || 45.0) * 1e6)) + (bytes / ((parameters.cpu_effective_bandwidth_gbps || 28.0) * 1e6));
-
     return linkSpeeds.map(l => {
       const linkTransferMs = (readBytes + writeBytes) / (l.speed * 1e6);
-      const nmcTotalMs = nmcComp + nmcBank + linkTransferMs + fixedOh;
+      const nmcTotalMs = compMs + linkTransferMs + layoutMs + syncOverheadMs;
       return {
         label: l.label,
         speedGbps: l.speed,
         nmcLatencyMs: Number(nmcTotalMs.toFixed(4)),
-        cpuLatencyMs: Number(cpuCost.toFixed(4)),
-        speedupVsCpu: Number((cpuCost / nmcTotalMs).toFixed(2)),
+        cpuLatencyMs: Number(cpuTotalMs.toFixed(4)),
+        speedupVsCpu: Number((cpuTotalMs / nmcTotalMs).toFixed(2)),
       };
     });
   }, [analysisResult, parameters]);
@@ -528,7 +556,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                     <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
                     <XAxis dataKey="strategy" stroke="#64748B" fontSize={11} tickLine={false} />
                     <YAxis stroke="#64748B" fontSize={11} tickLine={false} label={{ value: 'Cost (ms)', angle: -90, position: 'insideLeft', fill: '#64748B', fontSize: 11 }} />
-                    <Tooltip />
+                    <Tooltip content={<CustomBreakdownTooltip />} />
                     <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} />
                     <Bar dataKey="compute" name="Compute" stackId="a" fill="#7B68EE" />
                     <Bar dataKey="transfer" name="Transfer (PCIe)" stackId="a" fill="#48C9B0" />
@@ -536,6 +564,34 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                     <Bar dataKey="sync" name="Sync" stackId="a" fill="#BDBDBD" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+
+              {/* Exact Component Breakdown Table */}
+              <div className="overflow-x-auto mt-4 pt-3 border-t border-slate-100">
+                <table className="w-full text-xs text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50/80">
+                      <th className="py-2 px-3 font-bold text-slate-700">Strategy</th>
+                      <th className="py-2 px-3 font-bold text-slate-700 text-right">Compute</th>
+                      <th className="py-2 px-3 font-bold text-slate-700 text-right">Transfer</th>
+                      <th className="py-2 px-3 font-bold text-slate-700 text-right">Layout</th>
+                      <th className="py-2 px-3 font-bold text-slate-700 text-right">Sync & Overhead</th>
+                      <th className="py-2 px-3 font-bold text-slate-900 text-right">Total Latency</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
+                    {breakdownData.map((row) => (
+                      <tr key={row.strategy}>
+                        <td className="py-2 px-3 font-sans font-bold text-slate-800">{row.strategy}</td>
+                        <td className="py-2 px-3 text-right text-purple-700">{row.compute.toFixed(4)} ms</td>
+                        <td className="py-2 px-3 text-right text-emerald-700">{row.transfer.toFixed(4)} ms</td>
+                        <td className="py-2 px-3 text-right text-amber-700">{row.layout.toFixed(4)} ms</td>
+                        <td className="py-2 px-3 text-right text-slate-500">{row.sync.toFixed(4)} ms</td>
+                        <td className="py-2 px-3 text-right font-bold text-teal-700">{row.total.toFixed(4)} ms</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
 

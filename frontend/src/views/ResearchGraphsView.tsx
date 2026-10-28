@@ -71,6 +71,62 @@ export const ResearchGraphsView: React.FC<ResearchGraphsViewProps> = ({ onNaviga
   // Subfigure toggles for Fig 10: 'mtv' | 'mmtv'
   const [fig10SubTab, setFig10SubTab] = useState<'mtv' | 'mmtv'>('mtv');
 
+  const CustomFig1Tooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const total = payload.reduce((sum: number, p: any) => sum + (Number(p.value) || 0), 0);
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-slate-200 text-xs">
+          <p className="font-bold text-slate-800 mb-1">{label}</p>
+          <div className="space-y-1">
+            {payload.map((p: any) => {
+              const val = Number(p.value) || 0;
+              const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0';
+              return (
+                <div key={p.dataKey} className="flex justify-between gap-4">
+                  <span style={{ color: p.color }} className="font-medium">{p.name}:</span>
+                  <span className="font-mono text-slate-700">{val.toFixed(4)} ms ({pct}%)</span>
+                </div>
+              );
+            })}
+            <div className="pt-1 mt-1 border-t border-slate-100 flex justify-between font-bold text-slate-900">
+              <span>Total Latency:</span>
+              <span className="font-mono text-teal-700">{total.toFixed(4)} ms</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const CustomFig4bTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const total = payload.reduce((sum: number, p: any) => sum + (Number(p.value) || 0), 0);
+      return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-slate-200 text-xs">
+          <p className="font-bold text-slate-800 mb-1">Tile Scheme: {label}</p>
+          <div className="space-y-1">
+            {payload.map((p: any) => {
+              const val = Number(p.value) || 0;
+              const pct = total > 0 ? ((val / total) * 100).toFixed(1) : '0';
+              return (
+                <div key={p.dataKey} className="flex justify-between gap-4">
+                  <span style={{ color: p.color }} className="font-medium">{p.name}:</span>
+                  <span className="font-mono text-slate-700">{val.toFixed(3)} ms ({pct}%)</span>
+                </div>
+              );
+            })}
+            <div className="pt-1 mt-1 border-t border-slate-100 flex justify-between font-bold text-slate-900">
+              <span>Total Latency:</span>
+              <span className="font-mono text-teal-700">{total.toFixed(3)} ms</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   // Selected kernel for deep dive in Suite A
   const [selectedKernelId, setSelectedKernelId] = useState<string>('vector_add');
 
@@ -619,7 +675,7 @@ void dpu_kernel_gemv(int tasklet_id, int num_tasklets) {
                         <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
                         <XAxis dataKey="tile_shape" stroke="#64748B" fontSize={10} angle={-30} textAnchor="end" height={45} />
                         <YAxis stroke="#64748B" fontSize={11} domain={[0, 25]} label={{ value: 'Total latency (ms)', angle: -90, position: 'insideLeft', fill: '#64748B', fontSize: 11 }} />
-                        <Tooltip />
+                        <Tooltip content={<CustomFig4bTooltip />} />
                         <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} />
                         <Bar dataKey="h2d_ms" name="H->D" stackId="a" fill="#3182CE" />
                         <Bar dataKey="kernel_ms" name="Kernel" stackId="a" fill="#48BB78" />
@@ -647,7 +703,7 @@ void dpu_kernel_gemv(int tasklet_id, int num_tasklets) {
                         <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
                         <XAxis dataKey="tile_shape" stroke="#64748B" fontSize={10} angle={-30} textAnchor="end" height={45} />
                         <YAxis stroke="#64748B" fontSize={11} domain={[0, 0.8]} label={{ value: 'Total latency (ms)', angle: -90, position: 'insideLeft', fill: '#64748B', fontSize: 11 }} />
-                        <Tooltip />
+                        <Tooltip content={<CustomFig4bTooltip />} />
                         <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} />
                         <Bar dataKey="h2d_ms" name="H->D" stackId="a" fill="#3182CE" />
                         <Bar dataKey="kernel_ms" name="Kernel" stackId="a" fill="#48BB78" />
@@ -671,7 +727,7 @@ void dpu_kernel_gemv(int tasklet_id, int num_tasklets) {
                         <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
                         <XAxis dataKey="tile_shape" stroke="#64748B" fontSize={10} angle={-30} textAnchor="end" height={45} />
                         <YAxis stroke="#64748B" fontSize={11} domain={[0, 20]} label={{ value: 'Total latency (ms)', angle: -90, position: 'insideLeft', fill: '#64748B', fontSize: 11 }} />
-                        <Tooltip />
+                        <Tooltip content={<CustomFig4bTooltip />} />
                         <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} />
                         <Bar dataKey="h2d_ms" name="H->D" stackId="a" fill="#3182CE" />
                         <Bar dataKey="kernel_ms" name="Kernel" stackId="a" fill="#48BB78" />
@@ -888,7 +944,7 @@ void dpu_kernel_gemv(int tasklet_id, int num_tasklets) {
                     <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
                     <XAxis dataKey="strategy" stroke="#64748B" fontSize={12} tickLine={false} />
                     <YAxis stroke="#64748B" fontSize={11} tickLine={false} label={{ value: 'Execution Cost (ms)', angle: -90, position: 'insideLeft', fill: '#64748B', fontSize: 11 }} />
-                    <Tooltip />
+                    <Tooltip content={<CustomFig1Tooltip />} />
                     <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '11px' }} />
                     <Bar dataKey="compute" name="Compute" stackId="a" fill="#7B68EE" />
                     <Bar dataKey="transfer" name="Transfer" stackId="a" fill="#48C9B0" />
@@ -896,6 +952,44 @@ void dpu_kernel_gemv(int tasklet_id, int num_tasklets) {
                     <Bar dataKey="sync" name="Sync" stackId="a" fill="#BDBDBD" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+              </div>
+
+              {/* Exact Component Breakdown Table */}
+              <div className="overflow-x-auto pt-3 border-t border-slate-100">
+                <table className="w-full text-xs text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 bg-slate-50/80">
+                      <th className="py-2 px-3 font-bold text-slate-700">Strategy</th>
+                      <th className="py-2 px-3 font-bold text-slate-700 text-right">Compute</th>
+                      <th className="py-2 px-3 font-bold text-slate-700 text-right">Transfer</th>
+                      <th className="py-2 px-3 font-bold text-slate-700 text-right">Layout</th>
+                      <th className="py-2 px-3 font-bold text-slate-700 text-right">Sync</th>
+                      <th className="py-2 px-3 font-bold text-slate-900 text-right">Total Latency</th>
+                      <th className="py-2 px-3 font-bold text-teal-800 text-right">Speedup vs CPU</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-mono text-[11px]">
+                    {fig1Data.map((row) => {
+                      const cpuTotal = fig1Data.find(r => r.strategy === 'CPU')?.total || row.total;
+                      const speedup = row.total > 0 ? (cpuTotal / row.total).toFixed(2) : '1.00';
+                      const isWinner = row.strategy === 'NMC + transform' || (row.strategy === 'NMC' && selectedKernelId === 'relu');
+                      return (
+                        <tr key={row.strategy} className={isWinner ? 'bg-teal-50/40 font-semibold' : ''}>
+                          <td className="py-2 px-3 font-sans font-bold text-slate-800 flex items-center gap-1.5">
+                            {row.strategy}
+                            {isWinner && <span className="text-[9px] px-1.5 py-0.2 rounded bg-teal-600 text-white font-sans font-bold">Optimal</span>}
+                          </td>
+                          <td className="py-2 px-3 text-right text-purple-700">{row.compute.toFixed(4)} ms</td>
+                          <td className="py-2 px-3 text-right text-emerald-700">{row.transfer.toFixed(4)} ms</td>
+                          <td className="py-2 px-3 text-right text-amber-700">{row.layout.toFixed(4)} ms</td>
+                          <td className="py-2 px-3 text-right text-slate-500">{row.sync.toFixed(4)} ms</td>
+                          <td className="py-2 px-3 text-right font-bold text-slate-900">{row.total.toFixed(4)} ms</td>
+                          <td className="py-2 px-3 text-right font-bold text-teal-700">{speedup}x</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}

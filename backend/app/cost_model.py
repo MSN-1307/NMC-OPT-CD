@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional,Tuple
+from typing import Dict, Any, List, Optional, Tuple
 from app.schemas import (
     CostModelParameters,
     KernelAnalysisFacts,
@@ -13,8 +13,87 @@ class AnalyticalCostModel:
     """
     Transparent analytical cost model comparing CPU-only execution with Near-Memory Computing (NMC).
     Uses millisecond (ms) units consistently.
-    All formulas and constants are explicit and configurable.
+    All formulas and constants are explicit, configurable, and mathematically balanced so that
+    sum of breakdown components equals estimated total latency with 100% precision.
     """
+
+    @staticmethod
+    def _calc_layout_cost(
+        kernel_id: str,
+        is_bandwidth_bound: bool,
+        bytes_read: float,
+        params: CostModelParameters
+    ) -> Tuple[float, float]:
+        """
+        Calculates (variable_layout_ms, overhead_layout_ms).
+        Unary kernels (ReLU) incur zero layout collision overhead.
+        Interleaved/striped kernels incur layout rearrangement.
+        """
+        if kernel_id in ["relu"]:
+            return 0.0, 0.0
+        elif kernel_id in ["gemv", "vector_add", "vadd", "vec_add", "elementwise_mul", "axpy", "fused_scale_add"]:
+            var_ms = (bytes_read * 0.35) / (params.layout_conversion_bandwidth_gbps * 1e6)
+            oh_ms = params.layout_conversion_overhead_ms
+            return var_ms, oh_ms
+        elif kernel_id == "reduction":
+            var_ms = (bytes_read * 0.20) / (params.layout_conversion_bandwidth_gbps * 1e6)
+            oh_ms = params.layout_conversion_overhead_ms * 0.5
+            return var_ms, oh_ms
+        else:
+            if is_bandwidth_bound:
+                var_ms = (bytes_read * 0.30) / (params.layout_conversion_bandwidth_gbps * 1e6)
+                oh_ms = params.layout_conversion_overhead_ms
+            else:
+                var_ms = 0.0
+                oh_ms = params.layout_conversion_overhead_ms * 0.5
+            return var_ms, oh_ms
+
+    @classmethod
+    def _evaluate_raw_costs(
+        cls,
+        kernel_id: str,
+        is_bandwidth_bound: bool,
+        ops: float,
+        bytes_read: float,
+        bytes_written: float,
+        total_bytes: float,
+        params: CostModelParameters
+    ) -> Tuple[float, float, Optional[float]]:
+        """
+        Single source of truth evaluating total execution costs in milliseconds (ms)
+        for (CPU-only, Direct NMC, Transformed NMC).
+        """
+        # 1. CPU-Only
+        cpu_comp = ops / (params.cpu_compute_gflops * 1e6)
+        cpu_mem = total_bytes / (params.cpu_effective_bandwidth_gbps * 1e6)
+        cpu_total = round(cpu_comp + cpu_mem, 5)
+
+        # 2. Direct NMC
+        nmc_comp = ops / (params.nmc_compute_gflops * 1e6)
+        nmc_int_mem = total_bytes / (params.nmc_effective_bandwidth_gbps * 1e6)
+        pure_xfer = (bytes_read + bytes_written) / (params.host_link_bandwidth_gbps * 1e6)
+        layout_var, layout_oh = cls._calc_layout_cost(kernel_id, is_bandwidth_bound, bytes_read, params)
+        sync = params.sync_events * params.synchronization_overhead_ms
+        link_oh = params.host_to_nmc_overhead_ms + params.nmc_to_host_overhead_ms
+        nmc_total = round((nmc_comp + nmc_int_mem) + pure_xfer + (layout_var + layout_oh) + sync + link_oh, 5)
+
+        # 3. Transformed Candidate
+        trans_total = None
+        if kernel_id in ["relu", "fused_scale_add", "axpy"]:
+            fused_bytes = total_bytes * 0.65
+            fused_int_mem = fused_bytes / (params.nmc_effective_bandwidth_gbps * 1e6)
+            fused_xfer = ((bytes_read * 0.85) + bytes_written) / (params.host_link_bandwidth_gbps * 1e6)
+            fused_layout = (layout_var + layout_oh) * 0.70
+            fused_oh = link_oh + 0.008
+            trans_total = round((nmc_comp + fused_int_mem) + fused_xfer + fused_layout + sync + fused_oh, 5)
+        elif kernel_id == "gemv":
+            tiled_int_mem = (total_bytes * 0.40) / (params.nmc_effective_bandwidth_gbps * 1e6)
+            tiled_xfer = (bytes_written + (bytes_read * 0.35)) / (params.host_link_bandwidth_gbps * 1e6)
+            tiled_layout = (layout_var + layout_oh) * 0.50
+            tiled_oh = link_oh + 0.008
+            trans_total = round((nmc_comp + tiled_int_mem) + tiled_xfer + tiled_layout + sync + tiled_oh, 5)
+
+        return cpu_total, nmc_total, trans_total
 
     @staticmethod
     def evaluate_candidates(
@@ -35,20 +114,14 @@ class AnalyticalCostModel:
         # -------------------------------------------------------------
         # 1. CPU-Only Strategy
         # Formula: CPU_total = CPU_compute + CPU_memory
-        # Units:
-        # GFLOPS = 10^9 ops/sec = 10^6 ops/ms
-        # GB/s   = 10^9 B/sec   = 10^6 B/ms
         # -------------------------------------------------------------
-        cpu_compute_ms = ops / (params.cpu_compute_gflops * 1e6)
-        cpu_memory_ms = total_bytes / (params.cpu_effective_bandwidth_gbps * 1e6)
-        cpu_layout_ms = 0.0
-        cpu_sync_ms = 0.0
-        cpu_overhead_ms = 0.0
-        cpu_total_ms = cpu_compute_ms + cpu_memory_ms
+        cpu_compute_ms = round(ops / (params.cpu_compute_gflops * 1e6), 5)
+        cpu_memory_ms = round(total_bytes / (params.cpu_effective_bandwidth_gbps * 1e6), 5)
+        cpu_total_ms = round(cpu_compute_ms + cpu_memory_ms, 5)
 
         cpu_breakdown = CostBreakdown(
-            compute_ms=round(cpu_compute_ms, 5),
-            memory_or_transfer_ms=round(cpu_memory_ms, 5),
+            compute_ms=cpu_compute_ms,
+            memory_or_transfer_ms=cpu_memory_ms,
             layout_conversion_ms=0.0,
             synchronization_ms=0.0,
             overhead_ms=0.0
@@ -57,7 +130,7 @@ class AnalyticalCostModel:
         candidates.append(CandidateStrategy(
             strategy="CPU-only",
             valid=True,
-            estimated_total_ms=round(cpu_total_ms, 5),
+            estimated_total_ms=cpu_total_ms,
             speedup_vs_cpu=1.0,
             components_ms=cpu_breakdown,
             dominant_factor="Memory-bound on CPU bus" if cpu_memory_ms > cpu_compute_ms else "Compute-bound on CPU ALU",
@@ -67,44 +140,42 @@ class AnalyticalCostModel:
         # -------------------------------------------------------------
         # 2. Direct NMC Offload
         # Formula:
-        # NMC_total = NMC_compute + NMC_internal_mem + host_to_nmc + nmc_to_host + layout + sync
+        # NMC_total = (compute + internal_mem) + transfer_data + layout + sync + link_overhead
+        # Components are disjoint and their sum equals estimated_total_ms exactly.
         # -------------------------------------------------------------
         nmc_compute_ms = ops / (params.nmc_compute_gflops * 1e6)
-        # Internal NMC DRAM bank access time (fast internal row-buffer bandwidth)
         nmc_internal_mem_ms = total_bytes / (params.nmc_effective_bandwidth_gbps * 1e6)
-        
-        # Link transfers: input data must be dispatched to NMC, results returned to Host
-        # Reduction only returns a scalar (4 bytes) to host!
-        host_to_nmc_ms = (bytes_read / (params.host_link_bandwidth_gbps * 1e6)) + params.host_to_nmc_overhead_ms
-        nmc_to_host_ms = (bytes_written / (params.host_link_bandwidth_gbps * 1e6)) + params.nmc_to_host_overhead_ms
-        
-        # In Direct NMC, unaligned or non-bank-interleaved inputs require basic layout conversion
-        # Vector add and GEMV require interleaved layout for peak bank utilization
-        if kernel_id in ["gemv", "vector_add"]:
-            layout_ms = (bytes_read * 0.35) / (params.layout_conversion_bandwidth_gbps * 1e6) + params.layout_conversion_overhead_ms
-        else:
-            layout_ms = params.layout_conversion_overhead_ms * 0.5
+        comp_bank_ms = round(nmc_compute_ms + nmc_internal_mem_ms, 5)
 
-        sync_ms = params.sync_events * params.synchronization_overhead_ms
-        
-        nmc_total_ms = (nmc_compute_ms + nmc_internal_mem_ms) + host_to_nmc_ms + nmc_to_host_ms + layout_ms + sync_ms
-        speedup_nmc = (cpu_total_ms / nmc_total_ms) if nmc_total_ms > 0 else 0.0
+        # Pure link transfer (excluding DMA launch/dispatch overhead)
+        pure_transfer_ms = round((bytes_read + bytes_written) / (params.host_link_bandwidth_gbps * 1e6), 5)
+
+        layout_var, layout_oh = AnalyticalCostModel._calc_layout_cost(
+            kernel_id, facts.is_bandwidth_bound, bytes_read, params
+        )
+        layout_ms = round(layout_var + layout_oh, 5)
+
+        sync_ms = round(params.sync_events * params.synchronization_overhead_ms, 5)
+        link_overhead_ms = round(params.host_to_nmc_overhead_ms + params.nmc_to_host_overhead_ms, 5)
+
+        nmc_total_ms = round(comp_bank_ms + pure_transfer_ms + layout_ms + sync_ms + link_overhead_ms, 5)
+        speedup_nmc = round((cpu_total_ms / nmc_total_ms), 3) if nmc_total_ms > 0 else 0.0
 
         nmc_breakdown = CostBreakdown(
-            compute_ms=round(nmc_compute_ms + nmc_internal_mem_ms, 5),
-            memory_or_transfer_ms=round(host_to_nmc_ms + nmc_to_host_ms, 5),
-            layout_conversion_ms=round(layout_ms, 5),
-            synchronization_ms=round(sync_ms, 5),
-            overhead_ms=round(params.host_to_nmc_overhead_ms + params.nmc_to_host_overhead_ms, 5)
+            compute_ms=comp_bank_ms,
+            memory_or_transfer_ms=pure_transfer_ms,
+            layout_conversion_ms=layout_ms,
+            synchronization_ms=sync_ms,
+            overhead_ms=link_overhead_ms
         )
 
         candidates.append(CandidateStrategy(
             strategy="Direct NMC offload",
             valid=True,
-            estimated_total_ms=round(nmc_total_ms, 5),
-            speedup_vs_cpu=round(speedup_nmc, 3),
+            estimated_total_ms=nmc_total_ms,
+            speedup_vs_cpu=speedup_nmc,
             components_ms=nmc_breakdown,
-            dominant_factor="Host-Device Link Transfer" if (host_to_nmc_ms + nmc_to_host_ms) > (nmc_compute_ms + nmc_internal_mem_ms) else "Near-Memory Execution",
+            dominant_factor="Host-Device Link Transfer" if pure_transfer_ms + link_overhead_ms > comp_bank_ms else "Near-Memory Execution",
             notes="Directly maps kernel instructions to PIM processing units across DRAM banks."
         ))
 
@@ -112,27 +183,28 @@ class AnalyticalCostModel:
         # 3. NMC + Loop Fusion
         # Eligible only for kernels like ReLU or Fused AXPY
         # -------------------------------------------------------------
-        if kernel_id in ["relu", "fused_scale_add"]:
-            # Fusion eliminates 35% of intermediate memory reads/writes by keeping intermediate in PIM registers
+        if kernel_id in ["relu", "fused_scale_add", "axpy"]:
             fused_bytes = total_bytes * 0.65
             fused_internal_mem = fused_bytes / (params.nmc_effective_bandwidth_gbps * 1e6)
-            fused_transfer_ms = (bytes_read * 0.85 / (params.host_link_bandwidth_gbps * 1e6)) + params.host_to_nmc_overhead_ms + nmc_to_host_ms
-            fused_layout_ms = layout_ms * 0.7
-            fused_overhead = 0.008  # small instruction cache footprint
-            fused_total_ms = (nmc_compute_ms + fused_internal_mem) + fused_transfer_ms + fused_layout_ms + sync_ms + fused_overhead
-            speedup_fused = (cpu_total_ms / fused_total_ms) if fused_total_ms > 0 else 0.0
+            fused_comp_ms = round(nmc_compute_ms + fused_internal_mem, 5)
+            fused_transfer_ms = round(((bytes_read * 0.85) + bytes_written) / (params.host_link_bandwidth_gbps * 1e6), 5)
+            fused_layout_ms = round(layout_ms * 0.70, 5)
+            fused_instr_oh = 0.008  # small instruction cache footprint
+            fused_total_oh = round(link_overhead_ms + fused_instr_oh, 5)
+            fused_total_ms = round(fused_comp_ms + fused_transfer_ms + fused_layout_ms + sync_ms + fused_total_oh, 5)
+            speedup_fused = round((cpu_total_ms / fused_total_ms), 3) if fused_total_ms > 0 else 0.0
 
             candidates.append(CandidateStrategy(
                 strategy="NMC + Loop Fusion",
                 valid=True,
-                estimated_total_ms=round(fused_total_ms, 5),
-                speedup_vs_cpu=round(speedup_fused, 3),
+                estimated_total_ms=fused_total_ms,
+                speedup_vs_cpu=speedup_fused,
                 components_ms=CostBreakdown(
-                    compute_ms=round(nmc_compute_ms + fused_internal_mem, 5),
-                    memory_or_transfer_ms=round(fused_transfer_ms, 5),
-                    layout_conversion_ms=round(fused_layout_ms, 5),
-                    synchronization_ms=round(sync_ms, 5),
-                    overhead_ms=round(fused_overhead, 5)
+                    compute_ms=fused_comp_ms,
+                    memory_or_transfer_ms=fused_transfer_ms,
+                    layout_conversion_ms=fused_layout_ms,
+                    synchronization_ms=sync_ms,
+                    overhead_ms=fused_total_oh
                 ),
                 dominant_factor="Optimized Near-Memory Stream",
                 notes="Fuses operation with memory load to retain intermediate values in PIM local registers."
@@ -154,26 +226,26 @@ class AnalyticalCostModel:
         # Eligible only for kernels with multi-dimensional reuse (e.g., GEMV)
         # -------------------------------------------------------------
         if kernel_id == "gemv":
-            # Tiling partitions matrix rows and vector segments to fit into DRAM bank local SRAM/WRAM (64KB per unit)
-            # This eliminates redundant vector broadcasts and avoids bank conflicts across PIM channels
             tiled_internal_mem = (total_bytes * 0.40) / (params.nmc_effective_bandwidth_gbps * 1e6)
-            tiled_transfer_ms = (bytes_written + (bytes_read * 0.35)) / (params.host_link_bandwidth_gbps * 1e6) + params.host_to_nmc_overhead_ms + params.nmc_to_host_overhead_ms
-            tiled_layout_ms = layout_ms * 0.50
-            tiled_overhead = 0.008  # loop counter & block stepping overhead
-            tiled_total_ms = (nmc_compute_ms + tiled_internal_mem) + tiled_transfer_ms + tiled_layout_ms + sync_ms + tiled_overhead
-            speedup_tiled = (cpu_total_ms / tiled_total_ms) if tiled_total_ms > 0 else 0.0
+            tiled_comp_ms = round(nmc_compute_ms + tiled_internal_mem, 5)
+            tiled_transfer_ms = round((bytes_written + (bytes_read * 0.35)) / (params.host_link_bandwidth_gbps * 1e6), 5)
+            tiled_layout_ms = round(layout_ms * 0.50, 5)
+            tiled_loop_oh = 0.008  # loop counter & block stepping overhead
+            tiled_total_oh = round(link_overhead_ms + tiled_loop_oh, 5)
+            tiled_total_ms = round(tiled_comp_ms + tiled_transfer_ms + tiled_layout_ms + sync_ms + tiled_total_oh, 5)
+            speedup_tiled = round((cpu_total_ms / tiled_total_ms), 3) if tiled_total_ms > 0 else 0.0
 
             candidates.append(CandidateStrategy(
                 strategy="NMC + Tiling",
                 valid=True,
-                estimated_total_ms=round(tiled_total_ms, 5),
-                speedup_vs_cpu=round(speedup_tiled, 3),
+                estimated_total_ms=tiled_total_ms,
+                speedup_vs_cpu=speedup_tiled,
                 components_ms=CostBreakdown(
-                    compute_ms=round(nmc_compute_ms + tiled_internal_mem, 5),
-                    memory_or_transfer_ms=round(tiled_transfer_ms, 5),
-                    layout_conversion_ms=round(tiled_layout_ms, 5),
-                    synchronization_ms=round(sync_ms, 5),
-                    overhead_ms=round(tiled_overhead, 5)
+                    compute_ms=tiled_comp_ms,
+                    memory_or_transfer_ms=tiled_transfer_ms,
+                    layout_conversion_ms=tiled_layout_ms,
+                    synchronization_ms=sync_ms,
+                    overhead_ms=tiled_total_oh
                 ),
                 dominant_factor="Bank-Buffered Locality",
                 notes="Tiles matrix rows and columns across PIM banks to fit within 64KB WRAM buffers."
@@ -261,8 +333,9 @@ class AnalyticalCostModel:
             key_tradeoffs=tradeoffs
         )
 
-    @staticmethod
+    @classmethod
     def generate_chart_data(
+        cls,
         kernel_id: str,
         facts: KernelAnalysisFacts,
         params: CostModelParameters
@@ -272,30 +345,36 @@ class AnalyticalCostModel:
         from the cost model formulas across problem sizes and bandwidth values,
         tailored dynamically to the kernel's exact arithmetic intensity and memory footprint.
         """
+        if kernel_id in ["vadd", "vec_add"]:
+            kernel_id = "vector_add"
+
         scaling: List[ChartSeriesItem] = []
         
-        # Compute exact marginal rates per iteration for CPU and NMC
+        # Marginal slope rate calculation for analytical crossover detection
         it = max(facts.iterations, 1)
         ops_per_it = facts.estimated_operations / it
         bytes_per_it = facts.total_bytes_moved / it
         read_per_it = facts.estimated_bytes_read / it
         written_per_it = facts.estimated_bytes_written / it
 
-        # Marginal rate for CPU (ms/iteration)
+        layout_var_it, layout_oh_fixed = cls._calc_layout_cost(
+            kernel_id, facts.is_bandwidth_bound, facts.estimated_bytes_read, params
+        )
+        layout_var_per_it = layout_var_it / it
+
+        # Marginal per-iteration slopes (ms/it)
         cpu_marginal = (ops_per_it / (params.cpu_compute_gflops * 1e6)) + (bytes_per_it / (params.cpu_effective_bandwidth_gbps * 1e6))
+        nmc_marginal = (
+            (ops_per_it / (params.nmc_compute_gflops * 1e6)) +
+            (bytes_per_it / (params.nmc_effective_bandwidth_gbps * 1e6)) +
+            ((read_per_it + written_per_it) / (params.host_link_bandwidth_gbps * 1e6)) +
+            layout_var_per_it
+        )
 
-        # Marginal rate for NMC (ms/iteration)
-        nmc_comp_marginal = ops_per_it / (params.nmc_compute_gflops * 1e6)
-        nmc_bank_marginal = bytes_per_it / (params.nmc_effective_bandwidth_gbps * 1e6)
-        nmc_transfer_marginal = (read_per_it + written_per_it) / (params.host_link_bandwidth_gbps * 1e6)
-        layout_marginal = (read_per_it * (0.3 if facts.is_bandwidth_bound else 0.0)) / (params.layout_conversion_bandwidth_gbps * 1e6)
-        nmc_marginal = nmc_comp_marginal + nmc_bank_marginal + nmc_transfer_marginal + layout_marginal
-
-        # Fixed startup overheads for NMC (ms)
         fixed_overhead = (
             params.host_to_nmc_overhead_ms +
             params.nmc_to_host_overhead_ms +
-            (params.layout_conversion_overhead_ms if facts.is_bandwidth_bound else 0.0) +
+            layout_oh_fixed +
             (params.sync_events * params.synchronization_overhead_ms)
         )
 
@@ -303,7 +382,6 @@ class AnalyticalCostModel:
         crossover_label: str = "No Crossover (Compute-Bound)"
 
         if cpu_marginal > nmc_marginal:
-            # CPU is slower per iteration than NMC; calculate exact threshold where NMC beats CPU
             crossover_calc = int(fixed_overhead / (cpu_marginal - nmc_marginal))
             if crossover_calc < 10_000:
                 crossover_elements = max(1000, round(crossover_calc / 500) * 500)
@@ -345,60 +423,63 @@ class AnalyticalCostModel:
         test_sizes = sorted(list(set(raw_sizes)))
 
         for sz in test_sizes:
-            # Scale ops and bytes proportionally
-            ratio = sz / facts.iterations if facts.iterations > 0 else 1.0
-            cur_ops = facts.estimated_operations * ratio
-            cur_bytes = facts.total_bytes_moved * ratio
-            cur_read = facts.estimated_bytes_read * ratio
-            cur_written = facts.estimated_bytes_written * ratio
+            if kernel_id == "gemv":
+                dim = int(sz ** 0.5)
+                dim = max(16, (dim // 16) * 16)
+                rows = dim
+                cols = dim
+                sz_ops = 2.0 * rows * cols
+                sz_bytes_read = (rows * cols * 4.0) + (cols * 4.0)
+                sz_bytes_written = rows * 4.0
+                sz_total_bytes = sz_bytes_read + sz_bytes_written
+            elif kernel_id == "reduction":
+                sz_ops = float(sz)
+                sz_bytes_read = sz * 4.0
+                sz_bytes_written = 4.0  # scalar scalar output
+                sz_total_bytes = sz_bytes_read + sz_bytes_written
+            else:
+                ratio = sz / facts.iterations if facts.iterations > 0 else 1.0
+                sz_ops = facts.estimated_operations * ratio
+                sz_bytes_read = facts.estimated_bytes_read * ratio
+                sz_bytes_written = facts.estimated_bytes_written * ratio
+                sz_total_bytes = sz_bytes_read + sz_bytes_written
 
-            # CPU
-            cpu_comp = cur_ops / (params.cpu_compute_gflops * 1e6)
-            cpu_mem = cur_bytes / (params.cpu_effective_bandwidth_gbps * 1e6)
-            cpu_total = cpu_comp + cpu_mem
-
-            # NMC
-            nmc_comp = cur_ops / (params.nmc_compute_gflops * 1e6)
-            nmc_int_mem = cur_bytes / (params.nmc_effective_bandwidth_gbps * 1e6)
-            h2n = (cur_read / (params.host_link_bandwidth_gbps * 1e6)) + params.host_to_nmc_overhead_ms
-            n2h = (cur_written / (params.host_link_bandwidth_gbps * 1e6)) + params.nmc_to_host_overhead_ms
-            layout = ((cur_read * 0.3) / (params.layout_conversion_bandwidth_gbps * 1e6) + params.layout_conversion_overhead_ms) if facts.is_bandwidth_bound else 0.0
-            sync = params.sync_events * params.synchronization_overhead_ms
-            nmc_total = (nmc_comp + nmc_int_mem) + h2n + n2h + layout + sync
-
-            # Transformed candidate if applicable
-            trans_total = None
-            if kernel_id in ["relu", "fused_scale_add"]:
-                trans_total = (nmc_comp + (cur_bytes * 0.65) / (params.nmc_effective_bandwidth_gbps * 1e6)) + (h2n * 0.85) + n2h + (layout * 0.7) + sync + 0.008
-            elif kernel_id == "gemv":
-                trans_total = (nmc_comp + (cur_bytes * 0.7) / (params.nmc_effective_bandwidth_gbps * 1e6)) + (h2n * 0.85) + n2h + (layout * 0.8) + sync + 0.012
+            cpu_total, nmc_total, trans_total = cls._evaluate_raw_costs(
+                kernel_id, facts.is_bandwidth_bound, sz_ops, sz_bytes_read, sz_bytes_written, sz_total_bytes, params
+            )
 
             scaling.append(ChartSeriesItem(
                 input_size=sz,
                 cpu_ms=round(cpu_total, 4),
                 nmc_ms=round(nmc_total, 4),
-                transformed_ms=round(trans_total, 4) if trans_total else None
+                transformed_ms=round(trans_total, 4) if trans_total is not None else None
             ))
 
-        # Sensitivity analysis: sweep internal NMC bandwidth from 30 GB/s to 250 GB/s
+        # Sensitivity analysis: sweep internal NMC bandwidth from 30 GB/s to 260 GB/s
+        # ensuring the active hardware parameter bandwidth is precisely included
         sensitivity: List[SensitivityItem] = []
-        bw_points = [30.0, 50.0, 80.0, 110.0, 140.0, 180.0, 220.0, 260.0]
+        bw_points = sorted(list(set([30.0, 50.0, 80.0, 110.0, 140.0, 160.0, 180.0, 220.0, 260.0, float(params.nmc_effective_bandwidth_gbps)])))
         
-        cpu_cost_fixed = (facts.estimated_operations / (params.cpu_compute_gflops * 1e6)) + (facts.total_bytes_moved / (params.cpu_effective_bandwidth_gbps * 1e6))
+        cpu_cost_fixed = round((facts.estimated_operations / (params.cpu_compute_gflops * 1e6)) + (facts.total_bytes_moved / (params.cpu_effective_bandwidth_gbps * 1e6)), 4)
         
+        layout_var, layout_oh = cls._calc_layout_cost(kernel_id, facts.is_bandwidth_bound, facts.estimated_bytes_read, params)
+        layout_cost = layout_var + layout_oh
+        pure_transfer = (facts.estimated_bytes_read + facts.estimated_bytes_written) / (params.host_link_bandwidth_gbps * 1e6)
+        fixed_link_and_sync = (
+            params.host_to_nmc_overhead_ms +
+            params.nmc_to_host_overhead_ms +
+            (params.sync_events * params.synchronization_overhead_ms)
+        )
+        nmc_comp_fixed = facts.estimated_operations / (params.nmc_compute_gflops * 1e6)
+
         for bw in bw_points:
-            nmc_comp = facts.estimated_operations / (params.nmc_compute_gflops * 1e6)
             nmc_int_mem = facts.total_bytes_moved / (bw * 1e6)
-            h2n = (facts.estimated_bytes_read / (params.host_link_bandwidth_gbps * 1e6)) + params.host_to_nmc_overhead_ms
-            n2h = (facts.estimated_bytes_written / (params.host_link_bandwidth_gbps * 1e6)) + params.nmc_to_host_overhead_ms
-            layout = (facts.estimated_bytes_read * 0.3) / (params.layout_conversion_bandwidth_gbps * 1e6) + params.layout_conversion_overhead_ms
-            sync = params.sync_events * params.synchronization_overhead_ms
-            nmc_total = (nmc_comp + nmc_int_mem) + h2n + n2h + layout + sync
+            nmc_total = round(nmc_comp_fixed + nmc_int_mem + pure_transfer + layout_cost + fixed_link_and_sync, 4)
 
             sensitivity.append(SensitivityItem(
                 bandwidth_gbps=bw,
-                cpu_ms=round(cpu_cost_fixed, 4),
-                nmc_ms=round(nmc_total, 4)
+                cpu_ms=cpu_cost_fixed,
+                nmc_ms=nmc_total
             ))
 
         return scaling, sensitivity, crossover_elements, crossover_label
