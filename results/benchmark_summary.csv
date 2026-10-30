@@ -1,0 +1,7 @@
+Kernel ID,Kernel Name,Workload Scale,Arithmetic Intensity (FLOP/B),Data Volume (MB),Host CPU Latency (ms),Optimal Strategy Latency (ms),Speedup vs CPU,Recommended Strategy
+vector_add,Vector Addition (VADD),"2,000,000",0.0833,22.89,0.9016,0.7742,1.16x,Direct NMC offload
+gemv,Matrix-Vector Product (GEMV),2048x2048 (4.19M),0.4995,16.02,0.7862,0.5252,1.50x,NMC + Tiling
+relu,ReLU Activation,"2,000,000",0.1250,15.26,0.6159,0.4168,1.48x,NMC + Loop Fusion
+axpy,AXPY (Scaled Vector Add),"2,000,000",0.0833,22.89,0.9016,0.6512,1.38x,NMC + Loop Fusion
+reduction,Vector Sum Reduction,"2,000,000",0.2500,7.63,0.3301,0.3301,1.00x,CPU-only
+elementwise_mul,Element-wise Vector Multiply,"2,000,000",0.0833,22.89,0.9016,0.7742,1.16x,Direct NMC offload

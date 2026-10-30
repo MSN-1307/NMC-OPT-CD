@@ -1,6 +1,33 @@
 # NMC-Opt Studio: Near-Memory Computing Compiler Optimization Workbench
 ## Adaptive Data-Movement-Aware Compiler Optimization Pipeline
 
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-teal.svg)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-19-cyan.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5%2F6-blue.svg)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+## PROJECT SUBMISSION & ARTIFACT REPRODUCTION MATRIX
+
+The following compliance matrix maps all evaluation requirements directly to their locations within this repository:
+
+| # | Evaluation Requirement | Status | Repository Location / Direct Link | Description |
+|:---:|:---|:---:|:---|:---|
+| **1** | **Manuscript LaTeX Source (zip format)** | ⏳ *In Progress* | [`docs/manuscript_latex.zip`](docs/) | Complete Overleaf-ready LaTeX package (figures, `.bib`, `.tex` files). *(Uploading)* |
+| **2** | **Source Code** | ✅ **Available** | [`backend/`](backend/) & [`frontend/`](frontend/) | Complete production implementation of compiler AST parser, IR generator, cost model, and interactive UI. |
+| **3** | **README.md** | ✅ **Available** | [`README.md`](README.md) | Comprehensive technical documentation, architecture, execution manual, and reproduction guide. |
+| **4** | **Dependencies** | ✅ **Available** | [`backend/requirements.txt`](backend/requirements.txt)<br>[`frontend/package.json`](frontend/package.json) | Complete list of libraries, frameworks, and pinned version specifications. |
+| **5** | **Datasets & Kernels** | ✅ **Available** | [`datasets/`](datasets/) | C benchmark kernels (`vector_add.c`, `gemv.c`, etc.) and synthetic workload generation script [`generate_datasets.py`](datasets/generate_datasets.py). |
+| **6** | **Trained Models** | ℹ️ **N/A** | *Not Applicable* | NMC-OPT is a deterministic compiler framework & analytical DRAM simulator (No neural network weights required). |
+| **7** | **Configuration Files** | ✅ **Available** | [`.env.example`](.env.example)<br>[`backend/.env.example`](backend/.env.example)<br>[`frontend/.env.example`](frontend/.env.example) | Environment configurations and hardware architectural simulation templates. |
+| **8** | **Execution Scripts** | ✅ **Available** | [`run_dev.bat`](run_dev.bat), [`run_dev.ps1`](run_dev.ps1), [`run_dev.sh`](run_dev.sh)<br>[`run_tests.bat`](run_tests.bat), [`run_tests.sh`](run_tests.sh)<br>[`backend/cli.py`](backend/cli.py) | 1-Click launcher scripts, CLI evaluation pipeline, and automated test runners. |
+| **9** | **Results & Metrics** | ✅ **Available** | [`results/`](results/) | Tabulated metrics [`benchmark_summary.csv`](results/benchmark_summary.csv) and empirical outputs [`benchmark_summary.json`](results/benchmark_summary.json). |
+| **10** | **Documentation (Manuscript Draft 2)** | ✅ **Available** | [**NMC-OPT-Manuscript.pdf**](docs/NMC-OPT-Manuscript.pdf)<br>[**NMC-OPT-Manuscript-IEEE.pdf**](docs/NMC-OPT-Manuscript-IEEE.pdf) | Academic research manuscripts (Draft 2), IEEE two-column paper, and methodology specifications in [`docs/`](docs/). |
+| **11** | **Demo Video (4–7 mins)** | ⏳ *In Progress* | [**Demo Video Link**](#11-demo-video-walkthrough) | Full system demonstration walkthrough video (Ast parsing, cost model, 3D DRAM visualizer, CLI). |
+
 ---
 
 ## 1. PROJECT OVERVIEW AND EXECUTIVE SUMMARY
@@ -17,7 +44,7 @@ Near-Memory Computing (NMC) and Processing-In-Memory (PIM) paradigms mitigate th
 | Document | Description | Format & Scope | Direct Link |
 | :--- | :--- | :--- | :--- |
 | **IEEE Manuscript** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | 11-Page IEEE Format Manuscript | [NMC-OPT-Manuscript-IEEE.pdf](docs/NMC-OPT-Manuscript-IEEE.pdf) |
-| **Comprehensive Manuscript** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | 28-Page Complete Institutional Manuscript | [NMC-OPT-Manuscript.pdf](docs/NMC-OPT-Manuscript.pdf) |
+| **Comprehensive Manuscript (Draft 2)** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | 28-Page Complete Institutional Manuscript | [NMC-OPT-Manuscript.pdf](docs/NMC-OPT-Manuscript.pdf) |
 | **Compiler Methodology** | *Compiler Analytical Cost Model & Target Placement Methodology* | Formal Mathematical Formulation | [NMC_Opt_Methodology_Document.pdf](docs/NMC_Opt_Methodology_Document.pdf) |
 | **Scientific Novelty** | *Scientific Novelty & Architectural Innovations* | Research Contributions & State-of-the-Art Audit | [NMC_Opt_Novelty_Document.pdf](docs/NMC_Opt_Novelty_Document.pdf) |
 | **Execution Guide** | *Installation, Configuration & Execution Guide* | Complete Local & CLI Operations Manual | [NMC_Opt_Execution_Guide.pdf](docs/NMC_Opt_Execution_Guide.pdf) |
@@ -33,7 +60,7 @@ The workbench is organized into modular functional subsystems that mirror a prod
 ```
 +-----------------------------------------------------------------------------------------+
 |                        USER INTERFACE & WORKSPACE ENVIRONMENT                           |
-|  - Interactive Web Dashboard (React 18 / TypeScript / Tailwind CSS)                     |
+|  - Interactive Web Dashboard (React 19 / TypeScript / Tailwind CSS / Three.js)          |
 |  - Benchmark Selector (6 Standard Numerical Kernels + Custom C Source Ingestion)        |
 |  - Architectural Parameter Sliders (Problem Scale, Link Bus, DRAM Bandwidth, Clocks)    |
 |  - Compiler Copilot AI Assistant (Context-Aware Architectural RAG System)                |
@@ -61,35 +88,11 @@ The workbench is organized into modular functional subsystems that mirror a prod
 +-----------------------------------------------------------------------------------------+
 |                         ANALYTICS & OUTPUT VISUALIZATION                                |
 |  - Target Placement Matrix & Final Optimization Verdict                                 |
-|  - 8 Dynamic Comparative Performance & Sensitivity Graphs (Chart.js / SVG)             |
-|  - Physical 16-Bank Memory Interleaving Visualizer (Contiguous vs Bank-Parallel Layout) |
+|  - 8 Dynamic Comparative Performance & Sensitivity Graphs (Recharts / SVG)              |
+|  - Physical 16-Bank Memory Interleaving Visualizer (Three.js 3D DRAM Layout)            |
 |  - Research Paper Empirical Suites (IMTP Tiling & Memory Access Validation)             |
 +-----------------------------------------------------------------------------------------+
 ```
-
-### Functional Subsystems
-
-#### User Interface & Workspace Environment
-The frontend workspace provides real-time interaction with the underlying compiler passes. It contains dynamic input controls allowing users to modulate workload sizes ($N = 100$ to $10^7$ elements), host-to-memory interconnect bandwidths, and internal bank frequencies. An integrated benchmark selector offers immediate access to six pre-tuned numerical kernels, alongside a drag-and-drop modal for arbitrary C loop ingestion. The workspace also integrates a Compiler Copilot assistant backed by a retrieval engine primed on compiler optimization theory, roofline modeling, and near-memory hardware constraints.
-
-#### Workload Ingestion & AST Profiling
-Source kernels written in C are processed through an Abstract Syntax Tree (AST) parser built atop `pycparser`. The static profiler inspects loop induction variables, trip counts, control-flow branching, array pointer offsets, and arithmetic operator frequencies. The module synthesizes a structured facts object quantifying:
-- Total Floating-Point Operations ($W$)
-- Data Traffic Volume ($D = \text{Bytes Read} + \text{Bytes Written}$)
-- Arithmetic Intensity ($I = W / D$, measured in FLOP/Byte)
-- Memory Access Classification (Streaming Sequential, Strided, or Matrix-Row)
-
-#### Decision & Simulation Engine
-The core compiler logic maps AST statements into a simplified Static Single Assignment (SSA) Intermediate Representation (IR) consisting of explicit three-address quadruples (`load`, `store`, `getelementptr`, `fadd`, `fmul`, `icmp`, `phi`, `br_cond`). 
-
-Simultaneously, the engine executes an analytical cost evaluation using first-principles equations. It simulates memory channel mapping across a 16-bank interleaved PIM architecture, evaluating physical channel contention, bank conflict penalties, and layout transformation costs.
-
-#### Analytics & Output Visualization
-The reporting layer synthesizes compiler decisions into structured machine-readable outputs and visual components:
-- Optimization Verdict: Quantitative placement recommendation with speedup ratios and dominant architectural bottlenecks.
-- SSA IR Inspector: Interactive disassembly view showing line numbers, opcode mnemonics, operands, and compiler comments.
-- Performance Graph Suite: Eight analytical plots visualizing scaling curves, breakdown stacks, energy metrics, and roofline operational points.
-- 16-Bank Interleaved Layout Viewer: Interactive simulation depicting data distribution across independent DRAM banks and local DPUs.
 
 ### Core Decision Rule
 
@@ -99,361 +102,227 @@ The analytical execution times for Host CPU ($T_{\text{cpu}}$) and Near-Memory C
 
 $$T_{\text{cpu}} = T_{\text{comp}}^{\text{cpu}} + T_{\text{mem}}^{\text{cpu}} = \frac{W}{\Pi_{\text{cpu}}} + \frac{D}{\beta_{\text{cpu}}}$$
 
-$$T_{\text{nmc}} = T_{\text{comp}}^{\text{nmc}} + T_{\text{mem}}^{\text{nmc}} + T_{\text{link}} + T_{\text{layout}} + T_{\text{sync}}$$
+$$T_{\text{nmc}} = T_{\text{comp}}^{\text{nmc}} + T_{\text{mem}}^{\text{nmc}} + T_{\text{xfer}}^{\text{link}} + T_{\text{layout}} + T_{\text{sync}} + T_{\text{dispatch}}$$
 
-Where:
-$$T_{\text{comp}}^{\text{nmc}} = \frac{W}{\Pi_{\text{nmc}}}$$
-
-$$T_{\text{mem}}^{\text{nmc}} = \frac{D}{\beta_{\text{nmc}}}$$
-
-$$T_{\text{link}} = \frac{D_{\text{in}} + D_{\text{out}}}{\beta_{\text{link}}} + t_{\text{h2d}} + t_{\text{d2h}}$$
-
-$$T_{\text{layout}} = \frac{D_{\text{reorganize}}}{\beta_{\text{layout}}} + t_{\text{layout}}$$
-
-$$T_{\text{sync}} = S \cdot t_{\text{barrier}}$$
-
-**Formal Placement Rule:**
-$$\text{Placement Target} = \begin{cases} \mathbf{In\text{-}Memory\ DPU\ (NMC)} & \text{if } T_{\text{nmc}} < T_{\text{cpu}} \iff I < I_{\text{crossover}} \\ \mathbf{Host\ CPU} & \text{otherwise} \end{cases}$$
-
-When the kernel's arithmetic intensity $I$ is below the physical crossover threshold $I_{\text{crossover}}$, internal DRAM bank parallelism ($\beta_{\text{nmc}} \gg \beta_{\text{cpu}}$) amortizes the PCIe/CXL transfer penalty ($T_{\text{link}}$), producing net speedup. When $I \ge I_{\text{crossover}}$, compute intensity dominates, and the superior vector ALUs of the host CPU ($\Pi_{\text{cpu}} > \Pi_{\text{nmc}}$) dictate CPU retention.
+$$\text{Verdict} = \begin{cases} \text{Near-Memory Offload}, & \text{if } T_{\text{nmc}} < T_{\text{cpu}} \\ \text{Host CPU Execution}, & \text{otherwise} \end{cases}$$
 
 ---
 
-## 3. HARDWARE & COMPILER PARAMETERS SPECIFICATION
+## 3. DEPENDENCIES & TECHNOLOGY STACK
 
-All analytical models, simulation passes, and optimization thresholds are fully parameterized and configurable. The default parameters represent modern DDR5 / HBM3-PIM enterprise systems connected via PCIe Gen5 x16 or CXL 3.0 links.
+All dependencies are pinned and verified for zero-conflict installation in fresh virtual environments:
 
-| Parameter Identifier | Variable Name | Default Value | Valid Range | Unit | Architectural Description |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| Problem Scale | `input_size` ($N$) | 2,000,000 | 100 to 100,000,000 | Elements | Total number of array elements processed by the kernel. |
-| Matrix Dimension: Rows | `matrix_rows` ($M$) | 2,048 | 4 to 65,536 | Rows | Row dimension for dense matrix-vector operations (GEMV). |
-| Matrix Dimension: Columns | `matrix_cols` ($K$) | 2,048 | 4 to 65,536 | Columns | Column dimension for dense matrix-vector operations (GEMV). |
-| Host CPU Compute Peak | `cpu_compute_gflops` ($\Pi_{\text{cpu}}$) | 45.0 | 1.0 to 500.0 | GFLOPS | Effective vector floating-point throughput of host CPU cores. |
-| Host DRAM Bus Bandwidth | `cpu_effective_bandwidth_gbps` ($\beta_{\text{cpu}}$) | 28.0 | 1.0 to 128.0 | GB/s | Sustained streaming memory bandwidth across host memory channels. |
-| NMC Aggregate Compute Peak | `nmc_compute_gflops` ($\Pi_{\text{nmc}}$) | 32.0 | 1.0 to 256.0 | GFLOPS | Total aggregate compute throughput across all DRAM in-memory DPUs. |
-| Internal DRAM Bank Bandwidth | `nmc_effective_bandwidth_gbps` ($\beta_{\text{nmc}}$) | 160.0 | 1.0 to 1024.0 | GB/s | Ultra-wide aggregate internal bandwidth across all 16 DRAM banks. |
-| Interconnect Link Bandwidth | `host_link_bandwidth_gbps` ($\beta_{\text{link}}$) | 64.0 | 1.0 to 256.0 | GB/s | Effective unidirectional bandwidth of host bus (PCIe Gen5 x16 / CXL). |
-| Host-to-Device Dispatch Overhead | `host_to_nmc_overhead_ms` ($t_{\text{h2d}}$) | 0.020 | 0.0 to 5.0 | ms | Software driver, MMIO register write, and DMA setup latency. |
-| Device-to-Host Return Overhead | `nmc_to_host_overhead_ms` ($t_{\text{d2h}}$) | 0.020 | 0.0 to 5.0 | ms | Interrupt handling, completion notification, and return DMA latency. |
-| Layout Conversion Overhead | `layout_conversion_overhead_ms` ($t_{\text{layout}}$) | 0.020 | 0.0 to 5.0 | ms | In-memory layout transposition and strided rearrangement launch tax. |
-| Layout Conversion Bandwidth | `layout_conversion_bandwidth_gbps` ($\beta_{\text{layout}}$) | 48.0 | 1.0 to 256.0 | GB/s | Throughput of memory-side scatter/gather layout transformation. |
-| Synchronization Barrier Overhead | `synchronization_overhead_ms` ($t_{\text{barrier}}$) | 0.010 | 0.0 to 5.0 | ms | Global hardware barrier latency across all participating DRAM DPUs. |
-| Synchronization Event Count | `sync_events` ($S$) | 1 | 1 to 16 | Events | Number of cross-bank synchronization points per kernel execution. |
-| Bank Count | `bank_count` ($B$) | 16 | 4 to 64 | Banks | Number of independent physical DRAM banks hosting embedded ALUs. |
-| DPU Clock Frequency | `pim_frequency_mhz` ($f_{\text{dpu}}$) | 500 | 200 to 1200 | MHz | Operating clock frequency of near-memory execution units. |
-| Arithmetic Intensity Threshold | `I_crossover` | Calculated | 0.05 to 2.50 | FLOP/Byte | Workload-dependent intensity threshold below which NMC offload wins. |
+### Backend Dependencies (`backend/requirements.txt`)
+| Package | Version Constraint | Verified Version | Purpose / Architectural Role |
+|:---|:---:|:---:|:---|
+| **`fastapi`** | `>=0.110.0` | `0.115.0` | High-performance asynchronous REST API framework |
+| **`uvicorn[standard]`** | `>=0.28.0` | `0.30.6` | Production ASGI web server engine |
+| **`pydantic`** | `>=2.6.0` | `2.9.2` | Data schema validation, serialization, and typing |
+| **`pycparser`** | `>=2.21` | `2.22` | Pure-Python C99 Abstract Syntax Tree (AST) parser |
+| **`pytest`** | `>=8.0.0` | `8.3.3` | Test automation & regression verification runner |
+| **`httpx`** | `>=0.27.0` | `0.27.2` | Fast HTTP client for integration test assertions |
 
----
-
-## 4. ANALYTICAL GRAPH & METRIC EVALUATION GUIDE
-
-The platform computes and renders eight dynamic analytical figures that characterize performance, energy dissipation, and sensitivity frontiers.
-
-### Graph 1: Candidate Strategy Latency
-- **Objective:** Compares end-to-end execution time (in milliseconds) across all candidate compiler targets: CPU-Only Baseline, Direct NMC Offload, NMC with Loop Fusion, and NMC with Loop Tiling.
-- **Operational Interpretation:** Evaluates the relative speedup:
-  $$\text{Speedup} = \frac{T_{\text{cpu}}}{T_{\text{nmc}}}$$
-  A strategy is marked invalid if transformation legality preconditions fail (e.g., tiling an unnested 1D vector loop).
-
-### Graph 2: Input Size Scaling & Crossover Curve
-- **Objective:** Plots execution latency on a log-log scale as input elements scale from $N = 2^{12}$ (4,096) to $N = 2^{24}$ (16,777,216).
-- **Operational Interpretation:** Identifies the physical break-even point ($N_{\text{crossover}}$). At small scales, constant dispatch overheads ($t_{\text{h2d}} + t_{\text{d2h}}$) dominate $T_{\text{nmc}}$, making CPU execution faster. Beyond $N_{\text{crossover}}$, the high slope of $T_{\text{cpu}}$ (governed by $D / \beta_{\text{cpu}}$) causes it to exceed $T_{\text{nmc}}$, cementing NMC superiority.
-
-### Graph 3: Fine-Grained Latency Component Breakdown
-- **Objective:** Decomposes total execution time into a stacked representation of constituent architectural phases:
-  1. Pure Computation ($T_{\text{comp}}$)
-  2. Interconnect DMA Transfer ($T_{\text{link}}$)
-  3. Internal DRAM Bank Access ($T_{\text{mem}}$)
-  4. Layout Rearrangement ($T_{\text{layout}}$)
-  5. Inter-Bank Barrier Synchronization ($T_{\text{sync}}$)
-- **Operational Interpretation:** Informs compiler engineers whether an offload strategy is bottlenecked by bus transfers or by internal memory bank throughput.
-
-### Graph 4: Data Movement Energy Dissipation
-- **Objective:** Quantifies system energy consumption (measured in millijoules, mJ) partitioned into computational ALU energy and data movement energy.
-- **Operational Interpretation:** Off-chip DDR channel routing dissipates approximately $15.0 \text{ to } 25.0 \text{ pJ/bit}$ due to high capacitive PCB traces. Internal 3D TSV and near-bank transfers dissipate only $1.5 \text{ to } 3.0 \text{ pJ/bit}$. The graph highlights up to $80\%\text{--}90\%$ energy reduction for low-intensity memory-bound kernels.
-
-### Graph 5: Classical Roofline Model Operational Point
-- **Objective:** Projects the kernel's arithmetic intensity ($I = \text{FLOP/Byte}$) against the dual-ceiling roofline model representing maximum machine capability:
-  $$\text{Attainable Performance} = \min\left(\Pi_{\text{peak}},\ I \cdot \beta_{\text{peak}}\right)$$
-- **Operational Interpretation:** Depicts the inflection point ($I_{\text{knee}} = \Pi / \beta$). Kernels falling to the left of the knee are memory-bandwidth-bound, confirming theoretical viability for NMC offload.
-
-### Graph 6: PCIe/CXL Link Bandwidth Sensitivity
-- **Objective:** Evaluates total offload execution time as interconnect bandwidth sweeps across standard link profiles: Gen3 x16 (16 GB/s), Gen4 x16 (32 GB/s), Gen5 x16 (64 GB/s), and CXL 3.0 Fabric (128 GB/s).
-- **Operational Interpretation:** Visualizes how increasing interconnect throughput contracts link transfer time ($T_{\text{link}}$) and shifts the crossover point $N_{\text{crossover}}$ toward smaller dataset sizes.
-
-### Graph 7: DRAM Bank Contention & Layout Penalty
-- **Objective:** Contrasts memory access latency under non-interleaved (single-channel serialized) versus 16-bank interleaved memory striping.
-- **Operational Interpretation:** Illustrates bank conflict penalties caused by stride-induced channel collisions. Demonstrates why compiler-driven layout transformation passes are essential to unlock peak bank-level parallelism ($B \times \beta_{\text{single\_bank}}$).
-
-### Graph 8: Parallel DPU Strong Scaling Efficiency
-- **Objective:** Analyzes speedup scaling and parallel efficiency as available near-memory DPUs scale from 64 to 2,048 cores across DRAM ranks.
-- **Operational Interpretation:** Applies Amdahl's Law to model parallel degradation caused by non-parallelizable host setup latencies and sequential scalar aggregation (e.g., root reduction in tree reduction kernels).
+### Frontend Dependencies (`frontend/package.json`)
+| Package | Version Constraint | Verified Version | Purpose / Architectural Role |
+|:---|:---:|:---:|:---|
+| **`react`** & **`react-dom`** | `^19.2.8` | `19.2.8` | Component rendering engine (React 19) |
+| **`vite`** | `^8.3.0` | `8.3.4` | Ultra-fast build tool and local dev server |
+| **`typescript`** | `~6.0.2` | `6.0.2` | Static type checking and interface validation |
+| **`recharts`** | `^3.10.1` | `3.10.1` | Analytical scaling curves, sensitivity, & bar plots |
+| **`lucide-react`** | `^1.54.0` | `1.54.0` | Modern SVG system icon suite |
+| **`tailwindcss`** | `^3.4.19` | `3.4.19` | Utility-first responsive styling framework |
+| **`three`** | `^0.186.1` | `0.186.1` | WebGL 3D interactive DRAM bank topology visualizer |
 
 ---
 
-## 5. END-TO-END EXECUTION GUIDE
+## 4. DATASETS, KERNELS & PREPROCESSING
 
-This guide provides step-by-step instructions for cloning, configuring, and executing NMC-Opt Studio in a local development environment.
+Located in [`datasets/`](datasets/), the benchmark suite includes standardized linear algebra, neural network activations, and streaming numerical workloads:
+
+| Kernel ID | Source File | Mathematical Formulation | Operational Intensity | Bottleneck Profile | Optimal Placement |
+|:---|:---|:---|:---:|:---|:---|
+| `vector_add` | [`vector_add.c`](datasets/benchmarks/vector_add.c) | $C[i] = A[i] + B[i]$ | 0.083 FLOP/B | Memory-Bound | **Near-Memory (NMC)** |
+| `elementwise_mul`| [`elementwise_mul.c`](datasets/benchmarks/elementwise_mul.c) | $C[i] = A[i] \cdot B[i]$ | 0.083 FLOP/B | Memory-Bound | **Near-Memory (NMC)** |
+| `relu` | [`relu.c`](datasets/benchmarks/relu.c) | $Y[i] = \max(0.0, X[i])$ | 0.125 FLOP/B | Memory-Bound | **NMC + Loop Fusion** |
+| `axpy` | [`axpy.c`](datasets/benchmarks/axpy.c) | $Y[i] = \alpha \cdot X[i] + Y[i]$ | 0.167 FLOP/B | FMA Bound | **NMC + Loop Fusion** |
+| `reduction` | [`reduction.c`](datasets/benchmarks/reduction.c) | $\text{sum} = \sum A[i]$ | 0.250 FLOP/B | Scalar Reduction | **Host CPU (Retained)** |
+| `gemv` | [`gemv.c`](datasets/benchmarks/gemv.c) | $Y[i] = \sum A[i][j] \cdot X[j]$ | 0.500 FLOP/B | Structured 2D | **NMC + Loop Tiling** |
+
+### Synthetic Data Generation Utility
+To generate binary input buffers for memory trace simulation or memory throughput verification:
+```bash
+python datasets/generate_datasets.py --scale 2000000 --rows 2048 --cols 2048
+```
+
+---
+
+## 5. TRAINED MODELS (NOT APPLICABLE)
+
+> **Note on AI/ML Weights:**  
+> **NMC-Opt Studio is a deterministic compiler optimization framework and analytical DRAM cost simulator.** It relies on first-principles physics equations, Static Single Assignment (SSA) AST parsing, and Amdahl's Law parallel bounds. **No pre-trained neural network weights or checkpoint files are required.** The system executes completely standalone without downloading external weight blobs.
+
+---
+
+## 6. CONFIGURATION & ENVIRONMENT TEMPLATES
+
+The application operates with sane defaults out-of-the-box and can be tailored via environment templates:
+
+* Root Environment: [`.env.example`](.env.example)
+* Backend Server Settings: [`backend/.env.example`](backend/.env.example)
+* Frontend UI Settings: [`frontend/.env.example`](frontend/.env.example)
+
+### Hardware Parameter Schemas
+Architectural parameters (number of DRAM banks, internal bandwidth, host bus bandwidth, link latencies, dispatch overhead) are modeled through Pydantic schemas in [`backend/app/schemas.py`](backend/app/schemas.py) and can be interactively tuned in real-time through the UI Parameter Modal.
+
+---
+
+## 7. END-TO-END EXECUTION GUIDE
 
 ### Prerequisites
-Ensure the host development environment meets the following baseline requirements:
-- **Python:** Version 3.10 or higher (Python 3.11, 3.12, 3.13, and 3.14 verified)
-- **Node.js:** Version 18.0 or higher with `npm` (Node.js 20+ recommended)
-- **C Compiler:** GCC (MinGW for Windows, GNU GCC for Linux) or Clang (required for local native C compilation audits)
-- **Git:** Version 2.30 or higher
+* **Python:** 3.10 or higher
+* **Node.js:** 18.0 or higher with `npm`
+* **C Compiler:** GCC (MinGW for Windows, GNU GCC for Linux) or Clang (for native C inspection)
+* **Git:** 2.30 or higher
 
 ---
 
-### Step 1: Repository Cloning & Environment Initialization
+### Method A: 1-Click Startup Scripts (Recommended)
 
-Open a terminal or PowerShell session and clone the repository:
+#### On Windows:
+```cmd
+run_dev.bat
+```
+*(Or in PowerShell: `.\run_dev.ps1`)*
 
+#### On Linux / macOS:
 ```bash
-git clone https://github.com/MSN-1307/NMC-OPT-CD.git
-cd NMC-OPT-CD
+chmod +x run_dev.sh
+./run_dev.sh
 ```
 
-Verify directory structure:
-```
-NMC-OPT-CD/
-|-- backend/
-|   |-- app/
-|   |   |-- analyzer.py
-|   |   |-- benchmarks.py
-|   |   |-- copilot.py
-|   |   |-- cost_model.py
-|   |   |-- ir.py
-|   |   |-- main.py
-|   |   |-- optimizer.py
-|   |   |-- research_suite.py
-|   |   `-- schemas.py
-|   |-- tests/
-|   |-- cli.py
-|   `-- requirements.txt
-|-- frontend/
-|   |-- src/
-|   |-- package.json
-|   `-- vite.config.ts
-`-- README.md
-```
+Both services will spin up automatically:
+- **Frontend Dashboard:** [http://localhost:5173](http://localhost:5173)
+- **Backend API:** [http://127.0.0.1:8008](http://127.0.0.1:8008)
+- **Interactive Swagger Docs:** [http://127.0.0.1:8008/docs](http://127.0.0.1:8008/docs)
 
 ---
 
-### Step 2: Backend Setup
+### Method B: Manual Step-by-Step Setup
 
-Navigate to the `backend` directory, initialize a Python virtual environment, install all dependencies, and launch the FastAPI server.
-
-#### On Windows (PowerShell):
-```powershell
+#### Step 1: Backend Setup
+```bash
 cd backend
 python -m venv venv
+
+# On Windows:
 .\venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
+# On Linux/macOS:
+source venv/bin/activate
+
+pip install --upgrade pip
 pip install -r requirements.txt
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8008 --reload
 ```
 
-#### On Linux / macOS:
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-python3 -m pip install --upgrade pip
-pip install -r requirements.txt
-python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8008 --reload
-```
-
-#### API Verification:
-- OpenAPI / Swagger Interactive Documentation: `http://localhost:8008/docs`
-- Health Check Endpoint: `http://localhost:8008/api/health`
-
----
-
-### Step 3: Frontend Setup
-
-Open a separate terminal session, navigate to the `frontend` directory, install Node dependencies, and start the Vite development server.
-
+#### Step 2: Frontend Setup
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-The frontend application will start and serve at:
-```
-http://localhost:5173
-```
-
 ---
 
-### Step 4: CLI / Terminal Pipeline Execution
+### Method C: CLI / Terminal Pipeline Execution
 
-In addition to the interactive web dashboard, the compiler optimization engine can be executed directly via the command-line interface.
-
-#### 1. Evaluating Built-In Benchmarks:
-Execute the CLI tool to evaluate standard kernels with custom dataset sizes:
+Evaluators can run the optimization engine directly from the command line:
 
 ```bash
-# Evaluate Vector Addition with 2,000,000 elements
+# Evaluate built-in Vector Addition kernel with 2,000,000 elements
 python backend/cli.py --benchmark vector_add --size 2000000
 
-# Evaluate Matrix-Vector Multiplication with 2048 x 2048 matrix
-python backend/cli.py --benchmark gemv --size 4194304 --rows 2048 --cols 2048
+# Evaluate Dense Matrix-Vector Multiplication with 2048 x 2048 matrix
+python backend/cli.py --benchmark gemv --rows 2048 --cols 2048
 
-# Evaluate ReLU Activation with 5,000,000 elements
-python backend/cli.py --benchmark relu --size 5000000
-```
+# Evaluate custom C kernel file
+python backend/cli.py --custom datasets/benchmarks/relu.c --size 2500000
 
-#### 2. Evaluating Custom C Source Kernels:
-Create an arbitrary single-loop C file (e.g., `kernel.c`):
-
-```c
-// kernel.c
-void saxpy_loop(const float* X, float* Y, float a, int N) {
-    for (int i = 0; i < N; ++i) {
-        Y[i] = a * X[i] + Y[i];
-    }
-}
-```
-
-Run the pipeline against the custom kernel:
-
-```bash
-python backend/cli.py --custom kernel.c --size 4000000
-```
-
-#### 3. Emitting Raw JSON Output:
-Append `--json` to integrate with external automated pipelines:
-
-```bash
+# Emit machine-readable JSON output
 python backend/cli.py --benchmark vector_add --size 1000000 --json
 ```
 
-#### 4. Direct HTTP API Evaluation:
-You can also trigger optimization directly using `curl`:
+---
 
-```bash
-curl -X POST "http://127.0.0.1:8008/api/analyze" \
-     -H "Content-Type: application/json" \
-     -d '{"benchmark_id": "vector_add", "input_size": 2000000}'
+## 8. AUTOMATED TESTING & VERIFICATION
+
+To verify end-to-end functionality in a fresh environment, run the unified test suite:
+
+#### On Windows:
+```cmd
+run_tests.bat
 ```
+
+#### On Linux / macOS:
+```bash
+chmod +x run_tests.sh
+./run_tests.sh
+```
+
+The test runner validates:
+1. AST parsing and induction loop identification (`test_analyzer.py`)
+2. Mathematical cost model equations, transfer overheads, and crossover points (`test_cost_model.py`)
+3. Full compiler decision pipeline and transformation eligibility checks (`test_optimizer.py`)
+4. Full TypeScript static compilation and production asset bundling (`tsc -b && vite build`)
 
 ---
 
-### Step 5: Verification & Output Validation
+## 9. EXPERIMENTAL RESULTS & BENCHMARK METRICS
 
-To ensure algorithmic correctness and verify regression safety across all compiler modules, execute the automated backend test suite:
+Comprehensive analytical outputs are archived in [`results/`](results/):
 
-```bash
-cd backend
-python -m pytest tests -v
-```
+* **Tabular CSV Metrics:** [`results/benchmark_summary.csv`](results/benchmark_summary.csv)
+* **Raw JSON Metrics:** [`results/benchmark_summary.json`](results/benchmark_summary.json)
+* **Detailed Methodology:** [`results/README.md`](results/README.md)
 
-To verify frontend TypeScript integrity and production bundling:
-
-```bash
-cd frontend
-npm run build
-```
-
----
-
-## 6. BENCHMARK SUITE & C SOURCE KERNELS
-
-NMC-Opt Studio incorporates six standard numerical workloads spanning diverse operational intensity and access characteristics.
-
-### 1. Vector Addition (VADD)
-- **Mathematical Form:** $C[i] = A[i] + B[i]$
-- **Operational Metrics:** 1 FLOP / 12 Bytes moved $\implies I = 0.0833\text{ FLOP/Byte}$
-- **Access Pattern:** Contiguous, sequential streaming across three distinct 1D arrays.
-- **Compiler Assessment:** Severely memory-bandwidth-bound. Ideal candidate for direct NMC offload; eliminates round-trip bus saturation.
-```c
-void vector_add(const float* A, const float* B, float* C, int N) {
-    #pragma loop_bound min(100) max(10000000)
-    for (int i = 0; i < N; ++i) {
-        C[i] = A[i] + B[i];
-    }
-}
-```
-
-### 2. Vector Sum Reduction
-- **Mathematical Form:** $\text{sum} = \sum_{i=0}^{N-1} A[i]$
-- **Operational Metrics:** 1 FLOP / 4 Bytes read $\implies I = 0.2500\text{ FLOP/Byte}$
-- **Access Pattern:** Contiguous sequential stream producing a single scalar output.
-- **Compiler Assessment:** Asymmetric bandwidth demand: massive input stream, negligible return traffic (4 bytes). Optimized via parallel two-phase tree reduction across in-memory bank DPUs with final scalar aggregation on host CPU.
-```c
-float vector_reduction(const float* A, int N) {
-    float sum = 0.0f;
-    for (int i = 0; i < N; ++i) {
-        sum += A[i];
-    }
-    return sum;
-}
-```
-
-### 3. ReLU Activation
-- **Mathematical Form:** $Y[i] = \max(0.0, X[i])$
-- **Operational Metrics:** 1 Comparison / 8 Bytes moved $\implies I = 0.1250\text{ OP/Byte}$
-- **Access Pattern:** 1D streaming unary transformation.
-- **Compiler Assessment:** Zero arithmetic reuse. Highly memory-bound on CPU bus. Candidate for in-memory branchless CMOV or adjacent-layer loop fusion.
-```c
-void relu_kernel(const float* X, float* Y, int N) {
-    for (int i = 0; i < N; ++i) {
-        Y[i] = (X[i] > 0.0f) ? X[i] : 0.0f;
-    }
-}
-```
-
-### 4. Matrix-Vector Product (GEMV)
-- **Mathematical Form:** $Y[i] = \sum_{j=0}^{M-1} A[i \cdot M + j] \cdot X[j]$
-- **Operational Metrics:** $2NM\text{ FLOPs} / (4NM + 4M + 4N)\text{ Bytes} \implies I \approx 0.5000\text{ FLOP/Byte}$
-- **Access Pattern:** Dense 2D row-major matrix streaming with repeated vector $X$ reads.
-- **Compiler Assessment:** Moderate intensity. Requires row-tiling and bank-interleaved memory layout transformations to prevent bank conflict stalls and exploit local PIM register reuse.
-```c
-void gemv_kernel(const float* A, const float* X, float* Y, int N, int M) {
-    for (int i = 0; i < N; ++i) {
-        float sum = 0.0f;
-        for (int j = 0; j < M; ++j) {
-            sum += A[i * M + j] * X[j];
-        }
-        Y[i] = sum;
-    }
-}
-```
-
-### 5. AXPY (Scaled Vector Add)
-- **Mathematical Form:** $Y[i] = \alpha \cdot X[i] + Y[i]$
-- **Operational Metrics:** 2 FLOPs (1 Multiply, 1 Add) / 12 Bytes moved $\implies I = 0.1667\text{ FLOP/Byte}$
-- **Access Pattern:** Two vector streams (one read-only, one read-write).
-- **Compiler Assessment:** Fused Multiply-Add (FMA) target. Offloading avoids two round trips to host cache hierarchy by updating $Y[i]$ directly within DRAM bank ALUs.
-```c
-void axpy(float alpha, const float* X, float* Y, int N) {
-    #pragma loop_bound min(100) max(16777216)
-    for (int i = 0; i < N; ++i) {
-        Y[i] = alpha * X[i] + Y[i];
-    }
-}
-```
-
-### 6. Element-wise Vector Multiply
-- **Mathematical Form:** $C[i] = A[i] \cdot B[i]$
-- **Operational Metrics:** 1 FLOP / 12 Bytes moved $\implies I = 0.0833\text{ FLOP/Byte}$
-- **Access Pattern:** Dual streaming read, single streaming write.
-- **Compiler Assessment:** Mirror profile of Vector Addition. Constrained exclusively by memory channel throughput; exhibits linear scaling with internal DRAM bank bandwidth.
-```c
-void elementwise_mul(const float* A, const float* B, float* C, int N) {
-    #pragma loop_bound min(100) max(16777216)
-    for (int i = 0; i < N; ++i) {
-        C[i] = A[i] * B[i];
-    }
-}
-```
+### Empirical Performance Summary (Default Hardware Parameters)
+| Benchmark | Workload Size | Arithmetic Intensity | Host CPU Latency | NMC Latency | Speedup | Verdict |
+|:---|:---:|:---:|:---:|:---:|:---:|:---|
+| **Vector Add** | 2,000,000 | 0.0833 FLOP/B | 0.9016 ms | 0.7742 ms | **1.16x** | Direct NMC Offload |
+| **GEMV** | 2048x2048 (4.19M) | 0.4995 FLOP/B | 0.7862 ms | 0.5252 ms | **1.50x** | NMC + Loop Tiling |
+| **ReLU** | 2,000,000 | 0.1250 FLOP/B | 0.6159 ms | 0.4168 ms | **1.48x** | NMC + Loop Fusion |
+| **AXPY** | 2,000,000 | 0.0833 FLOP/B | 0.9016 ms | 0.6512 ms | **1.38x** | NMC + Loop Fusion |
+| **Reduction** | 2,000,000 | 0.2500 FLOP/B | 0.3301 ms | 0.3301 ms | **1.00x** | Host CPU (Retained) |
+| **Vector Mul** | 2,000,000 | 0.0833 FLOP/B | 0.9016 ms | 0.7742 ms | **1.16x** | Direct NMC Offload |
 
 ---
 
-## 7. CITATIONS AND SCIENTIFIC FOUNDATIONS
+## 10. DOCUMENTATION & MANUSCRIPT DRAFT 2
 
-The theoretical and analytical formulations embodied within NMC-Opt Studio draw upon foundational literature in computer architecture, memory-centric systems, and compiler design:
+All academic publications and engineering reports are preserved in the [`docs/`](docs/) directory:
+
+* [**NMC-OPT-Manuscript.pdf**](docs/NMC-OPT-Manuscript.pdf): **Full Manuscript (Draft 2)** – 28-page complete document detailing system architecture, SSA IR design, bank interleaving model, and empirical benchmarks.
+* [**NMC-OPT-Manuscript-IEEE.pdf**](docs/NMC-OPT-Manuscript-IEEE.pdf): **IEEE Two-Column Manuscript** – Standard conference publication format.
+* [**NMC_Opt_Execution_Guide.pdf**](docs/NMC_Opt_Execution_Guide.pdf): System operations guide.
+* [**NMC_Opt_Methodology_Document.pdf**](docs/NMC_Opt_Methodology_Document.pdf): Mathematical cost model derivations.
+* [**NMC_Opt_Novelty_Document.pdf**](docs/NMC_Opt_Novelty_Document.pdf): State-of-the-art comparison and novelty claims.
+
+---
+
+## 11. DEMO VIDEO WALKTHROUGH
+
+* **Target Duration:** 4 to 7 minutes
+* **Walkthrough Coverage:**
+  1. Live C source code parsing and AST loop trip count extraction
+  2. Intermediate Representation (SSA 3-address quadruple table) generation
+  3. Analytical cost modeling and target placement verdict comparison
+  4. Real-time sensitivity parameter sweeps (Interconnect bandwidth, DRAM vaults)
+  5. Interactive 3D DRAM memory bank topology viewer
+  6. Terminal execution via `backend/cli.py`
+* **Video Link:** [Click here to view project demonstration video](docs/README.md#3-demo-video-reference) *(Direct URL updated upon submission)*
+
+---
+
+## 12. CITATIONS AND SCIENTIFIC FOUNDATIONS
 
 1. **IMTP: Search-based Code Generation for In-memory Tensor Programs**  
    Yongwon Shin, Dookyung Kang, Hyojin Sung. *arXiv:2412.19630*, 2024.  
@@ -473,6 +342,6 @@ The theoretical and analytical formulations embodied within NMC-Opt Studio draw 
 
 ---
 
-## 8. LICENSE AND ACADEMIC INTEGRITY
+## 13. LICENSE AND ACADEMIC INTEGRITY
 
 This project is released under the **MIT License**. It was developed as an educational research workbench for Compiler Design and Computer Systems Engineering curricula. All cost models, analytical equations, and execution estimates represent first-principles architectural simulations and are explicitly structured for transparent algorithmic exploration.

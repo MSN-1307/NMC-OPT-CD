@@ -1,0 +1,2009 @@
+{
+  "vector_add": {
+    "kernel_id": "vector_add",
+    "kernel_name": "Vector Addition (VADD)",
+    "source_code": "// Vector Addition Kernel\nvoid vector_add(const float* A, const float* B, float* C, int N) {\n    #pragma loop_bound min(100) max(10000000)\n    for (int i = 0; i < N; ++i) {\n        C[i] = A[i] + B[i];\n    }\n}",
+    "analysis": {
+      "loop_bounds": "i in [0, 2000000)",
+      "iterations": 2000000,
+      "estimated_operations": 2000000,
+      "estimated_bytes_read": 16000000,
+      "estimated_bytes_written": 8000000,
+      "total_bytes_moved": 24000000,
+      "arithmetic_intensity": 0.0833,
+      "memory_access_pattern": "Streaming Contiguous Sequential",
+      "reuse_factor": 1.0,
+      "is_bandwidth_bound": true,
+      "data_type": "float32",
+      "element_bytes": 4
+    },
+    "simplified_ir": [
+      {
+        "line": 1,
+        "label": "entry",
+        "opcode": "fn_entry",
+        "operands": "vector_add(ptr %A, ptr %B, ptr %C, i32 %N)",
+        "comment": "Kernel entry point"
+      },
+      {
+        "line": 2,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.cond",
+        "comment": "Enter loop header"
+      },
+      {
+        "line": 3,
+        "label": "loop.cond",
+        "opcode": "phi",
+        "operands": "i32 [%i, %loop.inc], [0, %entry]",
+        "comment": "Induction variable i = 0"
+      },
+      {
+        "line": 4,
+        "label": null,
+        "opcode": "icmp_slt",
+        "operands": "%cmp = icmp slt i32 %i, %N",
+        "comment": "Check i < N"
+      },
+      {
+        "line": 5,
+        "label": null,
+        "opcode": "br_cond",
+        "operands": "i1 %cmp, label %loop.body, label %exit",
+        "comment": "Branch to body or exit"
+      },
+      {
+        "line": 6,
+        "label": "loop.body",
+        "opcode": "gep",
+        "operands": "%ptr.a = getelementptr inbounds float, ptr %A, i32 %i",
+        "comment": "Compute &A[i] address"
+      },
+      {
+        "line": 7,
+        "label": null,
+        "opcode": "load",
+        "operands": "float %val.a = load float, ptr %ptr.a, align 4",
+        "comment": "DRAM read A[i]"
+      },
+      {
+        "line": 8,
+        "label": null,
+        "opcode": "gep",
+        "operands": "%ptr.b = getelementptr inbounds float, ptr %B, i32 %i",
+        "comment": "Compute &B[i] address"
+      },
+      {
+        "line": 9,
+        "label": null,
+        "opcode": "load",
+        "operands": "float %val.b = load float, ptr %ptr.b, align 4",
+        "comment": "DRAM read B[i]"
+      },
+      {
+        "line": 10,
+        "label": null,
+        "opcode": "fadd",
+        "operands": "float %res = fadd float %val.a, %val.b",
+        "comment": "Floating point add (NMC ALU / CPU ALU)"
+      },
+      {
+        "line": 11,
+        "label": null,
+        "opcode": "gep",
+        "operands": "%ptr.c = getelementptr inbounds float, ptr %C, i32 %i",
+        "comment": "Compute &C[i] address"
+      },
+      {
+        "line": 12,
+        "label": null,
+        "opcode": "store",
+        "operands": "store float %res, ptr %ptr.c, align 4",
+        "comment": "DRAM write C[i]"
+      },
+      {
+        "line": 13,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.inc",
+        "comment": "Branch to increment"
+      },
+      {
+        "line": 14,
+        "label": "loop.inc",
+        "opcode": "add",
+        "operands": "i32 %i.next = add nuw nsw i32 %i, 1",
+        "comment": "i = i + 1"
+      },
+      {
+        "line": 15,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.cond",
+        "comment": "Loop back"
+      },
+      {
+        "line": 16,
+        "label": "exit",
+        "opcode": "ret",
+        "operands": "void",
+        "comment": "Function return"
+      }
+    ],
+    "ir_text": "entry:       fn_entry   vector_add(ptr %A, ptr %B, ptr %C, i32 %N)       ; Kernel entry point\n             br         label %loop.cond                                 ; Enter loop header\nloop.cond:   phi        i32 [%i, %loop.inc], [0, %entry]                 ; Induction variable i = 0\n             icmp_slt   %cmp = icmp slt i32 %i, %N                       ; Check i < N\n             br_cond    i1 %cmp, label %loop.body, label %exit           ; Branch to body or exit\nloop.body:   gep        %ptr.a = getelementptr inbounds float, ptr %A, i32 %i ; Compute &A[i] address\n             load       float %val.a = load float, ptr %ptr.a, align 4   ; DRAM read A[i]\n             gep        %ptr.b = getelementptr inbounds float, ptr %B, i32 %i ; Compute &B[i] address\n             load       float %val.b = load float, ptr %ptr.b, align 4   ; DRAM read B[i]\n             fadd       float %res = fadd float %val.a, %val.b           ; Floating point add (NMC ALU / CPU ALU)\n             gep        %ptr.c = getelementptr inbounds float, ptr %C, i32 %i ; Compute &C[i] address\n             store      store float %res, ptr %ptr.c, align 4            ; DRAM write C[i]\n             br         label %loop.inc                                  ; Branch to increment\nloop.inc:    add        i32 %i.next = add nuw nsw i32 %i, 1              ; i = i + 1\n             br         label %loop.cond                                 ; Loop back\nexit:        ret        void                                             ; Function return",
+    "transformations": [
+      {
+        "name": "Loop Fusion",
+        "eligible": false,
+        "reason": "Kernel 'Vector Addition (VADD)' lacks consecutive fusible loops or presents reduction/reduction-tree dependency.",
+        "potential_benefit": "None for standalone kernel."
+      },
+      {
+        "name": "Loop Tiling (Bank Blocking)",
+        "eligible": false,
+        "reason": "Streaming 1D kernel accesses elements once with zero temporal reuse; tiling adds index calculation overhead without cache reuse benefit.",
+        "potential_benefit": "None for 1D streaming workloads."
+      },
+      {
+        "name": "DRAM Bank Interleaving",
+        "eligible": true,
+        "reason": "Can partition array elements contiguously across distinct DRAM PIM banks (e.g. 16 or 64 banks) to maximize internal parallel memory bandwidth.",
+        "potential_benefit": "Maximizes internal aggregate DRAM throughput by distributing reads evenly across bank channels."
+      }
+    ],
+    "candidates": [
+      {
+        "strategy": "CPU-only",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.90158,
+        "speedup_vs_cpu": 1.0,
+        "components_ms": {
+          "compute_ms": 0.04444,
+          "memory_or_transfer_ms": 0.85714,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "Memory-bound on CPU bus",
+        "notes": "Standard CPU execution relying on host L1-L3 caches and memory bus."
+      },
+      {
+        "strategy": "Direct NMC offload",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.77417,
+        "speedup_vs_cpu": 1.165,
+        "components_ms": {
+          "compute_ms": 0.2125,
+          "memory_or_transfer_ms": 0.375,
+          "layout_conversion_ms": 0.13667,
+          "synchronization_ms": 0.01,
+          "overhead_ms": 0.04
+        },
+        "dominant_factor": "Host-Device Link Transfer",
+        "notes": "Directly maps kernel instructions to PIM processing units across DRAM banks."
+      },
+      {
+        "strategy": "NMC + Loop Fusion",
+        "valid": false,
+        "invalidation_reason": "Kernel 'vector_add' does not have fusible loop pairs; cannot apply loop fusion.",
+        "estimated_total_ms": 0.0,
+        "speedup_vs_cpu": 0.0,
+        "components_ms": {
+          "compute_ms": 0.0,
+          "memory_or_transfer_ms": 0.0,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "N/A",
+        "notes": "Legality check failed: in-memory fusion requires compatible loop boundaries and lack of reduction dependencies."
+      },
+      {
+        "strategy": "NMC + Tiling",
+        "valid": false,
+        "invalidation_reason": "1D streaming kernel 'vector_add' does not have temporal reuse; tiling adds loop overhead without cache benefit.",
+        "estimated_total_ms": 0.0,
+        "speedup_vs_cpu": 0.0,
+        "components_ms": {
+          "compute_ms": 0.0,
+          "memory_or_transfer_ms": 0.0,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "N/A",
+        "notes": "Legality check failed: loop tiling requires reuse across multiple iteration dimensions."
+      }
+    ],
+    "recommendation": {
+      "strategy": "Direct NMC offload",
+      "estimated_cost_ms": 0.77417,
+      "speedup_vs_cpu": 1.16,
+      "reason": "Direct NMC offload is recommended (0.774 ms, 1.16x speedup). The kernel has low arithmetic intensity (0.083 FLOP/B) and high data volume, allowing NMC's massive internal DRAM bank bandwidth to drastically outperform CPU memory bus limits.",
+      "key_tradeoffs": [
+        "Leverages high internal DRAM bank bandwidth (eliminating off-chip bus bottleneck).",
+        "Requires initial host-to-device data transfer and synchronization barrier.",
+        "High data volume (22.89 MB) amortizes dispatch overheads."
+      ]
+    },
+    "chart_scaling": [
+      {
+        "input_size": 70000,
+        "cpu_ms": 0.0316,
+        "nmc_ms": 0.0946,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 280000,
+        "cpu_ms": 0.1262,
+        "nmc_ms": 0.1686,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 700000,
+        "cpu_ms": 0.3156,
+        "nmc_ms": 0.3165,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 1400000,
+        "cpu_ms": 0.6311,
+        "nmc_ms": 0.5629,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 2000000,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7742,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 2800000,
+        "cpu_ms": 1.2622,
+        "nmc_ms": 1.0558,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 5600000,
+        "cpu_ms": 2.5244,
+        "nmc_ms": 2.0417,
+        "transformed_ms": null
+      }
+    ],
+    "chart_sensitivity": [
+      {
+        "bandwidth_gbps": 30.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 1.4242
+      },
+      {
+        "bandwidth_gbps": 50.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 1.1042
+      },
+      {
+        "bandwidth_gbps": 80.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.9242
+      },
+      {
+        "bandwidth_gbps": 110.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.8423
+      },
+      {
+        "bandwidth_gbps": 140.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7956
+      },
+      {
+        "bandwidth_gbps": 160.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7742
+      },
+      {
+        "bandwidth_gbps": 180.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7575
+      },
+      {
+        "bandwidth_gbps": 220.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7333
+      },
+      {
+        "bandwidth_gbps": 260.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7165
+      }
+    ],
+    "crossover_elements": 700000,
+    "crossover_point_label": "Crossover point ~700K Elements",
+    "assumptions": [
+      "Analytical Cost Model: All reported times in milliseconds (ms) calculated using explicit first-principles equations.",
+      "CPU Model: Effective compute = 45.0 GFLOPS, Host DRAM bandwidth = 28.0 GB/s.",
+      "NMC Model: Aggregate Near-Memory compute = 32.0 GFLOPS, Internal DRAM bank bandwidth = 160.0 GB/s.",
+      "Interconnect: Host <-> NMC PCIe/CXL link bandwidth = 64.0 GB/s with 0.020 ms dispatch overhead.",
+      "Data Layout: Bank reorganization modeled at 48.0 GB/s with 0.020 ms overhead.",
+      "Honesty Notice: All figures are analytical estimates for compiler educational exploration and do not claim physical silicon measurements."
+    ],
+    "warnings": []
+  },
+  "gemv": {
+    "kernel_id": "gemv",
+    "kernel_name": "Matrix-Vector Product (GEMV)",
+    "source_code": "// Matrix-Vector Multiplication (GEMV)\nvoid gemv_kernel(const float* A, const float* X, float* Y, int N, int M) {\n    for (int i = 0; i < N; ++i) {\n        float sum = 0.0f;\n        for (int j = 0; j < M; ++j) {\n            sum += A[i * M + j] * X[j];\n        }\n        Y[i] = sum;\n    }\n}",
+    "analysis": {
+      "loop_bounds": "outer: i in [0, 2048), inner: j in [0, 2048) (N=2048, M=2048)",
+      "iterations": 4194304,
+      "estimated_operations": 8388608,
+      "estimated_bytes_read": 16785408,
+      "estimated_bytes_written": 8192,
+      "total_bytes_moved": 16793600,
+      "arithmetic_intensity": 0.4995,
+      "memory_access_pattern": "2D Row-Major Matrix Scan + Repeated Vector Broadcast",
+      "reuse_factor": 2048.0,
+      "is_bandwidth_bound": true,
+      "data_type": "float32",
+      "element_bytes": 4
+    },
+    "simplified_ir": [
+      {
+        "line": 1,
+        "label": "entry",
+        "opcode": "fn_entry",
+        "operands": "gemv(ptr %A, ptr %X, ptr %Y, i32 %N, i32 %M)",
+        "comment": "Matrix-Vector kernel"
+      },
+      {
+        "line": 2,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %outer.cond",
+        "comment": "Enter outer loop"
+      },
+      {
+        "line": 3,
+        "label": "outer.cond",
+        "opcode": "phi",
+        "operands": "i32 [%i, %outer.inc], [0, %entry]",
+        "comment": "Outer row index i = 0"
+      },
+      {
+        "line": 4,
+        "label": null,
+        "opcode": "icmp_slt",
+        "operands": "%cmp.i = icmp slt i32 %i, %N",
+        "comment": "Check i < N"
+      },
+      {
+        "line": 5,
+        "label": null,
+        "opcode": "br_cond",
+        "operands": "i1 %cmp.i, label %inner.init, label %exit",
+        "comment": "Branch to row"
+      },
+      {
+        "line": 6,
+        "label": "inner.init",
+        "opcode": "phi",
+        "operands": "float [%sum, %inner.inc], [0.0, %outer.cond]",
+        "comment": "Row accumulator = 0.0"
+      },
+      {
+        "line": 7,
+        "label": null,
+        "opcode": "phi",
+        "operands": "i32 [%j, %inner.inc], [0, %outer.cond]",
+        "comment": "Col index j = 0"
+      },
+      {
+        "line": 8,
+        "label": null,
+        "opcode": "icmp_slt",
+        "operands": "%cmp.j = icmp slt i32 %j, %M",
+        "comment": "Check j < M"
+      },
+      {
+        "line": 9,
+        "label": null,
+        "opcode": "br_cond",
+        "operands": "i1 %cmp.j, label %inner.body, label %row.store",
+        "comment": "Branch to MAC"
+      },
+      {
+        "line": 10,
+        "label": "inner.body",
+        "opcode": "mul_add",
+        "operands": "%idx = mul i32 %i, %M; %off = add i32 %idx, %j",
+        "comment": "Row-major index i*M + j"
+      },
+      {
+        "line": 11,
+        "label": null,
+        "opcode": "gep",
+        "operands": "%ptr.a = getelementptr inbounds float, ptr %A, i32 %off",
+        "comment": "Address &A[i][j]"
+      },
+      {
+        "line": 12,
+        "label": null,
+        "opcode": "load",
+        "operands": "float %val.a = load float, ptr %ptr.a, align 4",
+        "comment": "DRAM read A[i][j]"
+      },
+      {
+        "line": 13,
+        "label": null,
+        "opcode": "gep",
+        "operands": "%ptr.x = getelementptr inbounds float, ptr %X, i32 %j",
+        "comment": "Address &X[j]"
+      },
+      {
+        "line": 14,
+        "label": null,
+        "opcode": "load",
+        "operands": "float %val.x = load float, ptr %ptr.x, align 4",
+        "comment": "Vector read X[j]"
+      },
+      {
+        "line": 15,
+        "label": null,
+        "opcode": "fmul",
+        "operands": "float %prod = fmul float %val.a, %val.x",
+        "comment": "Multiply A[i][j] * X[j]"
+      },
+      {
+        "line": 16,
+        "label": null,
+        "opcode": "fadd",
+        "operands": "float %sum.next = fadd float %sum, %prod",
+        "comment": "Accumulate row dot-product"
+      },
+      {
+        "line": 17,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %inner.inc",
+        "comment": "Increment inner"
+      },
+      {
+        "line": 18,
+        "label": "inner.inc",
+        "opcode": "add",
+        "operands": "i32 %j.next = add nuw nsw i32 %j, 1",
+        "comment": "j = j + 1"
+      },
+      {
+        "line": 19,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %inner.init",
+        "comment": "Inner loop back"
+      },
+      {
+        "line": 20,
+        "label": "row.store",
+        "opcode": "gep",
+        "operands": "%ptr.y = getelementptr inbounds float, ptr %Y, i32 %i",
+        "comment": "Address &Y[i]"
+      },
+      {
+        "line": 21,
+        "label": null,
+        "opcode": "store",
+        "operands": "store float %sum, ptr %ptr.y, align 4",
+        "comment": "Store result Y[i]"
+      },
+      {
+        "line": 22,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %outer.inc",
+        "comment": "Branch to outer inc"
+      },
+      {
+        "line": 23,
+        "label": "outer.inc",
+        "opcode": "add",
+        "operands": "i32 %i.next = add nuw nsw i32 %i, 1",
+        "comment": "i = i + 1"
+      },
+      {
+        "line": 24,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %outer.cond",
+        "comment": "Outer loop back"
+      },
+      {
+        "line": 25,
+        "label": "exit",
+        "opcode": "ret",
+        "operands": "void",
+        "comment": "Function return"
+      }
+    ],
+    "ir_text": "entry:       fn_entry   gemv(ptr %A, ptr %X, ptr %Y, i32 %N, i32 %M)     ; Matrix-Vector kernel\n             br         label %outer.cond                                ; Enter outer loop\nouter.cond:  phi        i32 [%i, %outer.inc], [0, %entry]                ; Outer row index i = 0\n             icmp_slt   %cmp.i = icmp slt i32 %i, %N                     ; Check i < N\n             br_cond    i1 %cmp.i, label %inner.init, label %exit        ; Branch to row\ninner.init:  phi        float [%sum, %inner.inc], [0.0, %outer.cond]     ; Row accumulator = 0.0\n             phi        i32 [%j, %inner.inc], [0, %outer.cond]           ; Col index j = 0\n             icmp_slt   %cmp.j = icmp slt i32 %j, %M                     ; Check j < M\n             br_cond    i1 %cmp.j, label %inner.body, label %row.store   ; Branch to MAC\ninner.body:  mul_add    %idx = mul i32 %i, %M; %off = add i32 %idx, %j   ; Row-major index i*M + j\n             gep        %ptr.a = getelementptr inbounds float, ptr %A, i32 %off ; Address &A[i][j]\n             load       float %val.a = load float, ptr %ptr.a, align 4   ; DRAM read A[i][j]\n             gep        %ptr.x = getelementptr inbounds float, ptr %X, i32 %j ; Address &X[j]\n             load       float %val.x = load float, ptr %ptr.x, align 4   ; Vector read X[j]\n             fmul       float %prod = fmul float %val.a, %val.x          ; Multiply A[i][j] * X[j]\n             fadd       float %sum.next = fadd float %sum, %prod         ; Accumulate row dot-product\n             br         label %inner.inc                                 ; Increment inner\ninner.inc:   add        i32 %j.next = add nuw nsw i32 %j, 1              ; j = j + 1\n             br         label %inner.init                                ; Inner loop back\nrow.store:   gep        %ptr.y = getelementptr inbounds float, ptr %Y, i32 %i ; Address &Y[i]\n             store      store float %sum, ptr %ptr.y, align 4            ; Store result Y[i]\n             br         label %outer.inc                                 ; Branch to outer inc\nouter.inc:   add        i32 %i.next = add nuw nsw i32 %i, 1              ; i = i + 1\n             br         label %outer.cond                                ; Outer loop back\nexit:        ret        void                                             ; Function return",
+    "transformations": [
+      {
+        "name": "Loop Fusion",
+        "eligible": false,
+        "reason": "Kernel 'Matrix-Vector Product (GEMV)' lacks consecutive fusible loops or presents reduction/reduction-tree dependency.",
+        "potential_benefit": "None for standalone kernel."
+      },
+      {
+        "name": "Loop Tiling (Bank Blocking)",
+        "eligible": true,
+        "reason": "Nested iteration space (N x M) with reusable vector X. Tiling matrix rows and vector segments allows fitting slices into local NMC bank buffers (e.g. 64KB WRAM).",
+        "potential_benefit": "Reduces bank conflict stalls and exploits temporal locality on vector X."
+      },
+      {
+        "name": "DRAM Bank Interleaving",
+        "eligible": true,
+        "reason": "Can partition array elements contiguously across distinct DRAM PIM banks (e.g. 16 or 64 banks) to maximize internal parallel memory bandwidth.",
+        "potential_benefit": "Maximizes internal aggregate DRAM throughput by distributing reads evenly across bank channels."
+      }
+    ],
+    "candidates": [
+      {
+        "strategy": "CPU-only",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.78618,
+        "speedup_vs_cpu": 1.0,
+        "components_ms": {
+          "compute_ms": 0.18641,
+          "memory_or_transfer_ms": 0.59977,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "Memory-bound on CPU bus",
+        "notes": "Standard CPU execution relying on host L1-L3 caches and memory bus."
+      },
+      {
+        "strategy": "Direct NMC offload",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.82189,
+        "speedup_vs_cpu": 0.957,
+        "components_ms": {
+          "compute_ms": 0.3671,
+          "memory_or_transfer_ms": 0.2624,
+          "layout_conversion_ms": 0.14239,
+          "synchronization_ms": 0.01,
+          "overhead_ms": 0.04
+        },
+        "dominant_factor": "Near-Memory Execution",
+        "notes": "Directly maps kernel instructions to PIM processing units across DRAM banks."
+      },
+      {
+        "strategy": "NMC + Loop Fusion",
+        "valid": false,
+        "invalidation_reason": "Kernel 'gemv' does not have fusible loop pairs; cannot apply loop fusion.",
+        "estimated_total_ms": 0.0,
+        "speedup_vs_cpu": 0.0,
+        "components_ms": {
+          "compute_ms": 0.0,
+          "memory_or_transfer_ms": 0.0,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "N/A",
+        "notes": "Legality check failed: in-memory fusion requires compatible loop boundaries and lack of reduction dependencies."
+      },
+      {
+        "strategy": "NMC + Tiling",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.52524,
+        "speedup_vs_cpu": 1.497,
+        "components_ms": {
+          "compute_ms": 0.30413,
+          "memory_or_transfer_ms": 0.09192,
+          "layout_conversion_ms": 0.07119,
+          "synchronization_ms": 0.01,
+          "overhead_ms": 0.048
+        },
+        "dominant_factor": "Bank-Buffered Locality",
+        "notes": "Tiles matrix rows and columns across PIM banks to fit within 64KB WRAM buffers."
+      }
+    ],
+    "recommendation": {
+      "strategy": "NMC + Tiling",
+      "estimated_cost_ms": 0.52524,
+      "speedup_vs_cpu": 1.5,
+      "reason": "NMC with Loop Tiling is recommended (0.525 ms, 1.50x speedup). Tiling rows and columns partitions data into bank-local buffers, maximizing reuse and avoiding bank conflicts.",
+      "key_tradeoffs": [
+        "Exploits reuse on broadcast vector X inside bank-local SRAM/WRAM.",
+        "Eliminates DRAM bank access collisions across parallel PIM channels.",
+        "Adds minor index arithmetic overhead in the inner loop."
+      ]
+    },
+    "chart_scaling": [
+      {
+        "input_size": 860000,
+        "cpu_ms": 0.156,
+        "nmc_ms": 0.2192,
+        "transformed_ms": 0.1587
+      },
+      {
+        "input_size": 3440000,
+        "cpu_ms": 0.6347,
+        "nmc_ms": 0.677,
+        "transformed_ms": 0.4371
+      },
+      {
+        "input_size": 4194304,
+        "cpu_ms": 0.7862,
+        "nmc_ms": 0.8219,
+        "transformed_ms": 0.5252
+      },
+      {
+        "input_size": 8600000,
+        "cpu_ms": 1.6066,
+        "nmc_ms": 1.6066,
+        "transformed_ms": 1.0025
+      },
+      {
+        "input_size": 17200000,
+        "cpu_ms": 3.2177,
+        "nmc_ms": 3.1476,
+        "transformed_ms": 1.9396
+      },
+      {
+        "input_size": 34400000,
+        "cpu_ms": 6.4248,
+        "nmc_ms": 6.2153,
+        "transformed_ms": 3.8052
+      },
+      {
+        "input_size": 68800000,
+        "cpu_ms": 12.8683,
+        "nmc_ms": 12.3788,
+        "transformed_ms": 7.5534
+      }
+    ],
+    "chart_sensitivity": [
+      {
+        "bandwidth_gbps": 30.0,
+        "cpu_ms": 0.7862,
+        "nmc_ms": 1.2767
+      },
+      {
+        "bandwidth_gbps": 50.0,
+        "cpu_ms": 0.7862,
+        "nmc_ms": 1.0528
+      },
+      {
+        "bandwidth_gbps": 80.0,
+        "cpu_ms": 0.7862,
+        "nmc_ms": 0.9269
+      },
+      {
+        "bandwidth_gbps": 110.0,
+        "cpu_ms": 0.7862,
+        "nmc_ms": 0.8696
+      },
+      {
+        "bandwidth_gbps": 140.0,
+        "cpu_ms": 0.7862,
+        "nmc_ms": 0.8369
+      },
+      {
+        "bandwidth_gbps": 160.0,
+        "cpu_ms": 0.7862,
+        "nmc_ms": 0.8219
+      },
+      {
+        "bandwidth_gbps": 180.0,
+        "cpu_ms": 0.7862,
+        "nmc_ms": 0.8102
+      },
+      {
+        "bandwidth_gbps": 220.0,
+        "cpu_ms": 0.7862,
+        "nmc_ms": 0.7933
+      },
+      {
+        "bandwidth_gbps": 260.0,
+        "cpu_ms": 0.7862,
+        "nmc_ms": 0.7815
+      }
+    ],
+    "crossover_elements": 8600000,
+    "crossover_point_label": "Crossover point ~8.60M Elements",
+    "assumptions": [
+      "Analytical Cost Model: All reported times in milliseconds (ms) calculated using explicit first-principles equations.",
+      "CPU Model: Effective compute = 45.0 GFLOPS, Host DRAM bandwidth = 28.0 GB/s.",
+      "NMC Model: Aggregate Near-Memory compute = 32.0 GFLOPS, Internal DRAM bank bandwidth = 160.0 GB/s.",
+      "Interconnect: Host <-> NMC PCIe/CXL link bandwidth = 64.0 GB/s with 0.020 ms dispatch overhead.",
+      "Data Layout: Bank reorganization modeled at 48.0 GB/s with 0.020 ms overhead.",
+      "Honesty Notice: All figures are analytical estimates for compiler educational exploration and do not claim physical silicon measurements."
+    ],
+    "warnings": []
+  },
+  "relu": {
+    "kernel_id": "relu",
+    "kernel_name": "ReLU Activation",
+    "source_code": "// Rectified Linear Unit (ReLU)\nvoid relu_kernel(const float* X, float* Y, int N) {\n    for (int i = 0; i < N; ++i) {\n        Y[i] = (X[i] > 0.0f) ? X[i] : 0.0f;\n    }\n}",
+    "analysis": {
+      "loop_bounds": "i in [0, 2000000)",
+      "iterations": 2000000,
+      "estimated_operations": 2000000,
+      "estimated_bytes_read": 8000000,
+      "estimated_bytes_written": 8000000,
+      "total_bytes_moved": 16000000,
+      "arithmetic_intensity": 0.125,
+      "memory_access_pattern": "Streaming Contiguous Pointwise",
+      "reuse_factor": 1.0,
+      "is_bandwidth_bound": true,
+      "data_type": "float32",
+      "element_bytes": 4
+    },
+    "simplified_ir": [
+      {
+        "line": 1,
+        "label": "entry",
+        "opcode": "fn_entry",
+        "operands": "relu(ptr %X, ptr %Y, i32 %N)",
+        "comment": "Kernel entry point"
+      },
+      {
+        "line": 2,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.cond",
+        "comment": "Enter loop"
+      },
+      {
+        "line": 3,
+        "label": "loop.cond",
+        "opcode": "phi",
+        "operands": "i32 [%i, %loop.inc], [0, %entry]",
+        "comment": "Induction variable i = 0"
+      },
+      {
+        "line": 4,
+        "label": null,
+        "opcode": "icmp_slt",
+        "operands": "%cmp = icmp slt i32 %i, %N",
+        "comment": "Check i < N"
+      },
+      {
+        "line": 5,
+        "label": null,
+        "opcode": "br_cond",
+        "operands": "i1 %cmp, label %loop.body, label %exit",
+        "comment": "Branch"
+      },
+      {
+        "line": 6,
+        "label": "loop.body",
+        "opcode": "gep",
+        "operands": "%ptr.x = getelementptr inbounds float, ptr %X, i32 %i",
+        "comment": "Address &X[i]"
+      },
+      {
+        "line": 7,
+        "label": null,
+        "opcode": "load",
+        "operands": "float %val.x = load float, ptr %ptr.x, align 4",
+        "comment": "Read X[i]"
+      },
+      {
+        "line": 8,
+        "label": null,
+        "opcode": "fcmp_ogt",
+        "operands": "i1 %is_pos = fcmp ogt float %val.x, 0.0",
+        "comment": "Compare X[i] > 0.0"
+      },
+      {
+        "line": 9,
+        "label": null,
+        "opcode": "select",
+        "operands": "float %out = select i1 %is_pos, float %val.x, float 0.0",
+        "comment": "CMOV / select 0 or val"
+      },
+      {
+        "line": 10,
+        "label": null,
+        "opcode": "gep",
+        "operands": "%ptr.y = getelementptr inbounds float, ptr %Y, i32 %i",
+        "comment": "Address &Y[i]"
+      },
+      {
+        "line": 11,
+        "label": null,
+        "opcode": "store",
+        "operands": "store float %out, ptr %ptr.y, align 4",
+        "comment": "Write Y[i]"
+      },
+      {
+        "line": 12,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.inc",
+        "comment": "Increment block"
+      },
+      {
+        "line": 13,
+        "label": "loop.inc",
+        "opcode": "add",
+        "operands": "i32 %i.next = add nuw nsw i32 %i, 1",
+        "comment": "i = i + 1"
+      },
+      {
+        "line": 14,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.cond",
+        "comment": "Loop back"
+      },
+      {
+        "line": 15,
+        "label": "exit",
+        "opcode": "ret",
+        "operands": "void",
+        "comment": "Function return"
+      }
+    ],
+    "ir_text": "entry:       fn_entry   relu(ptr %X, ptr %Y, i32 %N)                     ; Kernel entry point\n             br         label %loop.cond                                 ; Enter loop\nloop.cond:   phi        i32 [%i, %loop.inc], [0, %entry]                 ; Induction variable i = 0\n             icmp_slt   %cmp = icmp slt i32 %i, %N                       ; Check i < N\n             br_cond    i1 %cmp, label %loop.body, label %exit           ; Branch\nloop.body:   gep        %ptr.x = getelementptr inbounds float, ptr %X, i32 %i ; Address &X[i]\n             load       float %val.x = load float, ptr %ptr.x, align 4   ; Read X[i]\n             fcmp_ogt   i1 %is_pos = fcmp ogt float %val.x, 0.0          ; Compare X[i] > 0.0\n             select     float %out = select i1 %is_pos, float %val.x, float 0.0 ; CMOV / select 0 or val\n             gep        %ptr.y = getelementptr inbounds float, ptr %Y, i32 %i ; Address &Y[i]\n             store      store float %out, ptr %ptr.y, align 4            ; Write Y[i]\n             br         label %loop.inc                                  ; Increment block\nloop.inc:    add        i32 %i.next = add nuw nsw i32 %i, 1              ; i = i + 1\n             br         label %loop.cond                                 ; Loop back\nexit:        ret        void                                             ; Function return",
+    "transformations": [
+      {
+        "name": "Loop Fusion",
+        "eligible": true,
+        "reason": "Kernel has simple pointwise iteration space without loop-carried dependencies; can fuse producer/consumer loops to eliminate intermediate memory traffic.",
+        "potential_benefit": "Reduces round-trip DRAM access by caching intermediate variables in Near-Memory registers."
+      },
+      {
+        "name": "Loop Tiling (Bank Blocking)",
+        "eligible": false,
+        "reason": "Streaming 1D kernel accesses elements once with zero temporal reuse; tiling adds index calculation overhead without cache reuse benefit.",
+        "potential_benefit": "None for 1D streaming workloads."
+      },
+      {
+        "name": "DRAM Bank Interleaving",
+        "eligible": true,
+        "reason": "Can partition array elements contiguously across distinct DRAM PIM banks (e.g. 16 or 64 banks) to maximize internal parallel memory bandwidth.",
+        "potential_benefit": "Maximizes internal aggregate DRAM throughput by distributing reads evenly across bank channels."
+      }
+    ],
+    "candidates": [
+      {
+        "strategy": "CPU-only",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.61587,
+        "speedup_vs_cpu": 1.0,
+        "components_ms": {
+          "compute_ms": 0.04444,
+          "memory_or_transfer_ms": 0.57143,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "Memory-bound on CPU bus",
+        "notes": "Standard CPU execution relying on host L1-L3 caches and memory bus."
+      },
+      {
+        "strategy": "Direct NMC offload",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.4625,
+        "speedup_vs_cpu": 1.332,
+        "components_ms": {
+          "compute_ms": 0.1625,
+          "memory_or_transfer_ms": 0.25,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.01,
+          "overhead_ms": 0.04
+        },
+        "dominant_factor": "Host-Device Link Transfer",
+        "notes": "Directly maps kernel instructions to PIM processing units across DRAM banks."
+      },
+      {
+        "strategy": "NMC + Loop Fusion",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.41675,
+        "speedup_vs_cpu": 1.478,
+        "components_ms": {
+          "compute_ms": 0.1275,
+          "memory_or_transfer_ms": 0.23125,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.01,
+          "overhead_ms": 0.048
+        },
+        "dominant_factor": "Optimized Near-Memory Stream",
+        "notes": "Fuses operation with memory load to retain intermediate values in PIM local registers."
+      },
+      {
+        "strategy": "NMC + Tiling",
+        "valid": false,
+        "invalidation_reason": "1D streaming kernel 'relu' does not have temporal reuse; tiling adds loop overhead without cache benefit.",
+        "estimated_total_ms": 0.0,
+        "speedup_vs_cpu": 0.0,
+        "components_ms": {
+          "compute_ms": 0.0,
+          "memory_or_transfer_ms": 0.0,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "N/A",
+        "notes": "Legality check failed: loop tiling requires reuse across multiple iteration dimensions."
+      }
+    ],
+    "recommendation": {
+      "strategy": "NMC + Loop Fusion",
+      "estimated_cost_ms": 0.41675,
+      "speedup_vs_cpu": 1.48,
+      "reason": "NMC with Loop Fusion is recommended (0.417 ms, 1.48x speedup). Fusing operations eliminates intermediate DRAM round-trips and keeps intermediate operands in PIM registers.",
+      "key_tradeoffs": [
+        "Eliminates intermediate memory traffic between consecutive loop iterations.",
+        "Maximizes compute density per DRAM bank cycle.",
+        "Requires compiler code-generation support for unified loop kernels."
+      ]
+    },
+    "chart_scaling": [
+      {
+        "input_size": 50000,
+        "cpu_ms": 0.0154,
+        "nmc_ms": 0.0603,
+        "transformed_ms": 0.067
+      },
+      {
+        "input_size": 200000,
+        "cpu_ms": 0.0616,
+        "nmc_ms": 0.0912,
+        "transformed_ms": 0.0939
+      },
+      {
+        "input_size": 500000,
+        "cpu_ms": 0.154,
+        "nmc_ms": 0.1531,
+        "transformed_ms": 0.1477
+      },
+      {
+        "input_size": 1000000,
+        "cpu_ms": 0.3079,
+        "nmc_ms": 0.2562,
+        "transformed_ms": 0.2374
+      },
+      {
+        "input_size": 2000000,
+        "cpu_ms": 0.6159,
+        "nmc_ms": 0.4625,
+        "transformed_ms": 0.4168
+      },
+      {
+        "input_size": 4000000,
+        "cpu_ms": 1.2317,
+        "nmc_ms": 0.875,
+        "transformed_ms": 0.7755
+      }
+    ],
+    "chart_sensitivity": [
+      {
+        "bandwidth_gbps": 30.0,
+        "cpu_ms": 0.6159,
+        "nmc_ms": 0.8958
+      },
+      {
+        "bandwidth_gbps": 50.0,
+        "cpu_ms": 0.6159,
+        "nmc_ms": 0.6825
+      },
+      {
+        "bandwidth_gbps": 80.0,
+        "cpu_ms": 0.6159,
+        "nmc_ms": 0.5625
+      },
+      {
+        "bandwidth_gbps": 110.0,
+        "cpu_ms": 0.6159,
+        "nmc_ms": 0.508
+      },
+      {
+        "bandwidth_gbps": 140.0,
+        "cpu_ms": 0.6159,
+        "nmc_ms": 0.4768
+      },
+      {
+        "bandwidth_gbps": 160.0,
+        "cpu_ms": 0.6159,
+        "nmc_ms": 0.4625
+      },
+      {
+        "bandwidth_gbps": 180.0,
+        "cpu_ms": 0.6159,
+        "nmc_ms": 0.4514
+      },
+      {
+        "bandwidth_gbps": 220.0,
+        "cpu_ms": 0.6159,
+        "nmc_ms": 0.4352
+      },
+      {
+        "bandwidth_gbps": 260.0,
+        "cpu_ms": 0.6159,
+        "nmc_ms": 0.424
+      }
+    ],
+    "crossover_elements": 500000,
+    "crossover_point_label": "Crossover point ~500K Elements",
+    "assumptions": [
+      "Analytical Cost Model: All reported times in milliseconds (ms) calculated using explicit first-principles equations.",
+      "CPU Model: Effective compute = 45.0 GFLOPS, Host DRAM bandwidth = 28.0 GB/s.",
+      "NMC Model: Aggregate Near-Memory compute = 32.0 GFLOPS, Internal DRAM bank bandwidth = 160.0 GB/s.",
+      "Interconnect: Host <-> NMC PCIe/CXL link bandwidth = 64.0 GB/s with 0.020 ms dispatch overhead.",
+      "Data Layout: Bank reorganization modeled at 48.0 GB/s with 0.020 ms overhead.",
+      "Honesty Notice: All figures are analytical estimates for compiler educational exploration and do not claim physical silicon measurements."
+    ],
+    "warnings": []
+  },
+  "axpy": {
+    "kernel_id": "axpy",
+    "kernel_name": "AXPY (Scaled Vector Add)",
+    "source_code": "// Fused AXPY Kernel (alpha * X[i] + Y[i])\nvoid axpy(float alpha, const float* X, float* Y, int N) {\n    #pragma loop_bound min(100) max(16777216)\n    for (int i = 0; i < N; ++i) {\n        Y[i] = alpha * X[i] + Y[i];\n    }\n}",
+    "analysis": {
+      "loop_bounds": "i in [0, 2000000)",
+      "iterations": 2000000,
+      "estimated_operations": 2000000,
+      "estimated_bytes_read": 16000000,
+      "estimated_bytes_written": 8000000,
+      "total_bytes_moved": 24000000,
+      "arithmetic_intensity": 0.0833,
+      "memory_access_pattern": "Sequential Array Access",
+      "reuse_factor": 1.0,
+      "is_bandwidth_bound": true,
+      "data_type": "float32",
+      "element_bytes": 4
+    },
+    "simplified_ir": [
+      {
+        "line": 1,
+        "label": "entry",
+        "opcode": "fn_entry",
+        "operands": "axpy(float %alpha, ptr %X, ptr %Y, i32 %N)",
+        "comment": "AXPY kernel"
+      },
+      {
+        "line": 2,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.cond",
+        "comment": "Enter loop"
+      },
+      {
+        "line": 3,
+        "label": "loop.cond",
+        "opcode": "phi",
+        "operands": "i32 [%i, %loop.inc], [0, %entry]",
+        "comment": "Induction i = 0"
+      },
+      {
+        "line": 4,
+        "label": null,
+        "opcode": "icmp_slt",
+        "operands": "%cmp = icmp slt i32 %i, %N",
+        "comment": "Check i < N"
+      },
+      {
+        "line": 5,
+        "label": null,
+        "opcode": "br_cond",
+        "operands": "i1 %cmp, label %loop.body, label %exit",
+        "comment": "Branch"
+      },
+      {
+        "line": 6,
+        "label": "loop.body",
+        "opcode": "gep",
+        "operands": "%ptr.x = getelementptr inbounds float, ptr %X, i32 %i",
+        "comment": "Address &X[i]"
+      },
+      {
+        "line": 7,
+        "label": null,
+        "opcode": "load",
+        "operands": "float %val.x = load float, ptr %ptr.x, align 4",
+        "comment": "Load X[i]"
+      },
+      {
+        "line": 8,
+        "label": null,
+        "opcode": "gep",
+        "operands": "%ptr.y = getelementptr inbounds float, ptr %Y, i32 %i",
+        "comment": "Address &Y[i]"
+      },
+      {
+        "line": 9,
+        "label": null,
+        "opcode": "load",
+        "operands": "float %val.y = load float, ptr %ptr.y, align 4",
+        "comment": "Load Y[i]"
+      },
+      {
+        "line": 10,
+        "label": null,
+        "opcode": "fmul",
+        "operands": "float %scaled = fmul float %alpha, %val.x",
+        "comment": "Scale alpha * X[i]"
+      },
+      {
+        "line": 11,
+        "label": null,
+        "opcode": "fadd",
+        "operands": "float %res = fadd float %scaled, %val.y",
+        "comment": "Add to Y[i]"
+      },
+      {
+        "line": 12,
+        "label": null,
+        "opcode": "store",
+        "operands": "store float %res, ptr %ptr.y, align 4",
+        "comment": "Writeback Y[i]"
+      },
+      {
+        "line": 13,
+        "label": "loop.inc",
+        "opcode": "add",
+        "operands": "i32 %i.next = add nuw nsw i32 %i, 1",
+        "comment": "i = i + 1"
+      },
+      {
+        "line": 14,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.cond",
+        "comment": "Loop back"
+      },
+      {
+        "line": 15,
+        "label": "exit",
+        "opcode": "ret",
+        "operands": "void",
+        "comment": "Function return"
+      }
+    ],
+    "ir_text": "entry:       fn_entry   axpy(float %alpha, ptr %X, ptr %Y, i32 %N)       ; AXPY kernel\n             br         label %loop.cond                                 ; Enter loop\nloop.cond:   phi        i32 [%i, %loop.inc], [0, %entry]                 ; Induction i = 0\n             icmp_slt   %cmp = icmp slt i32 %i, %N                       ; Check i < N\n             br_cond    i1 %cmp, label %loop.body, label %exit           ; Branch\nloop.body:   gep        %ptr.x = getelementptr inbounds float, ptr %X, i32 %i ; Address &X[i]\n             load       float %val.x = load float, ptr %ptr.x, align 4   ; Load X[i]\n             gep        %ptr.y = getelementptr inbounds float, ptr %Y, i32 %i ; Address &Y[i]\n             load       float %val.y = load float, ptr %ptr.y, align 4   ; Load Y[i]\n             fmul       float %scaled = fmul float %alpha, %val.x        ; Scale alpha * X[i]\n             fadd       float %res = fadd float %scaled, %val.y          ; Add to Y[i]\n             store      store float %res, ptr %ptr.y, align 4            ; Writeback Y[i]\nloop.inc:    add        i32 %i.next = add nuw nsw i32 %i, 1              ; i = i + 1\n             br         label %loop.cond                                 ; Loop back\nexit:        ret        void                                             ; Function return",
+    "transformations": [
+      {
+        "name": "Loop Fusion",
+        "eligible": false,
+        "reason": "Kernel 'AXPY (Scaled Vector Add)' lacks consecutive fusible loops or presents reduction/reduction-tree dependency.",
+        "potential_benefit": "None for standalone kernel."
+      },
+      {
+        "name": "Loop Tiling (Bank Blocking)",
+        "eligible": false,
+        "reason": "Streaming 1D kernel accesses elements once with zero temporal reuse; tiling adds index calculation overhead without cache reuse benefit.",
+        "potential_benefit": "None for 1D streaming workloads."
+      },
+      {
+        "name": "DRAM Bank Interleaving",
+        "eligible": true,
+        "reason": "Can partition array elements contiguously across distinct DRAM PIM banks (e.g. 16 or 64 banks) to maximize internal parallel memory bandwidth.",
+        "potential_benefit": "Maximizes internal aggregate DRAM throughput by distributing reads evenly across bank channels."
+      }
+    ],
+    "candidates": [
+      {
+        "strategy": "CPU-only",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.90158,
+        "speedup_vs_cpu": 1.0,
+        "components_ms": {
+          "compute_ms": 0.04444,
+          "memory_or_transfer_ms": 0.85714,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "Memory-bound on CPU bus",
+        "notes": "Standard CPU execution relying on host L1-L3 caches and memory bus."
+      },
+      {
+        "strategy": "Direct NMC offload",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.77417,
+        "speedup_vs_cpu": 1.165,
+        "components_ms": {
+          "compute_ms": 0.2125,
+          "memory_or_transfer_ms": 0.375,
+          "layout_conversion_ms": 0.13667,
+          "synchronization_ms": 0.01,
+          "overhead_ms": 0.04
+        },
+        "dominant_factor": "Host-Device Link Transfer",
+        "notes": "Directly maps kernel instructions to PIM processing units across DRAM banks."
+      },
+      {
+        "strategy": "NMC + Loop Fusion",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.65117,
+        "speedup_vs_cpu": 1.385,
+        "components_ms": {
+          "compute_ms": 0.16,
+          "memory_or_transfer_ms": 0.3375,
+          "layout_conversion_ms": 0.09567,
+          "synchronization_ms": 0.01,
+          "overhead_ms": 0.048
+        },
+        "dominant_factor": "Optimized Near-Memory Stream",
+        "notes": "Fuses operation with memory load to retain intermediate values in PIM local registers."
+      },
+      {
+        "strategy": "NMC + Tiling",
+        "valid": false,
+        "invalidation_reason": "1D streaming kernel 'axpy' does not have temporal reuse; tiling adds loop overhead without cache benefit.",
+        "estimated_total_ms": 0.0,
+        "speedup_vs_cpu": 0.0,
+        "components_ms": {
+          "compute_ms": 0.0,
+          "memory_or_transfer_ms": 0.0,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "N/A",
+        "notes": "Legality check failed: loop tiling requires reuse across multiple iteration dimensions."
+      }
+    ],
+    "recommendation": {
+      "strategy": "NMC + Loop Fusion",
+      "estimated_cost_ms": 0.65117,
+      "speedup_vs_cpu": 1.38,
+      "reason": "NMC with Loop Fusion is recommended (0.651 ms, 1.38x speedup). Fusing operations eliminates intermediate DRAM round-trips and keeps intermediate operands in PIM registers.",
+      "key_tradeoffs": [
+        "Eliminates intermediate memory traffic between consecutive loop iterations.",
+        "Maximizes compute density per DRAM bank cycle.",
+        "Requires compiler code-generation support for unified loop kernels."
+      ]
+    },
+    "chart_scaling": [
+      {
+        "input_size": 70000,
+        "cpu_ms": 0.0316,
+        "nmc_ms": 0.0946,
+        "transformed_ms": 0.0923
+      },
+      {
+        "input_size": 280000,
+        "cpu_ms": 0.1262,
+        "nmc_ms": 0.1686,
+        "transformed_ms": 0.1531
+      },
+      {
+        "input_size": 700000,
+        "cpu_ms": 0.3156,
+        "nmc_ms": 0.3165,
+        "transformed_ms": 0.2747
+      },
+      {
+        "input_size": 1400000,
+        "cpu_ms": 0.6311,
+        "nmc_ms": 0.5629,
+        "transformed_ms": 0.4774
+      },
+      {
+        "input_size": 2000000,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7742,
+        "transformed_ms": 0.6512
+      },
+      {
+        "input_size": 2800000,
+        "cpu_ms": 1.2622,
+        "nmc_ms": 1.0558,
+        "transformed_ms": 0.8828
+      },
+      {
+        "input_size": 5600000,
+        "cpu_ms": 2.5244,
+        "nmc_ms": 2.0417,
+        "transformed_ms": 1.6937
+      }
+    ],
+    "chart_sensitivity": [
+      {
+        "bandwidth_gbps": 30.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 1.4242
+      },
+      {
+        "bandwidth_gbps": 50.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 1.1042
+      },
+      {
+        "bandwidth_gbps": 80.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.9242
+      },
+      {
+        "bandwidth_gbps": 110.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.8423
+      },
+      {
+        "bandwidth_gbps": 140.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7956
+      },
+      {
+        "bandwidth_gbps": 160.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7742
+      },
+      {
+        "bandwidth_gbps": 180.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7575
+      },
+      {
+        "bandwidth_gbps": 220.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7333
+      },
+      {
+        "bandwidth_gbps": 260.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7165
+      }
+    ],
+    "crossover_elements": 700000,
+    "crossover_point_label": "Crossover point ~700K Elements",
+    "assumptions": [
+      "Analytical Cost Model: All reported times in milliseconds (ms) calculated using explicit first-principles equations.",
+      "CPU Model: Effective compute = 45.0 GFLOPS, Host DRAM bandwidth = 28.0 GB/s.",
+      "NMC Model: Aggregate Near-Memory compute = 32.0 GFLOPS, Internal DRAM bank bandwidth = 160.0 GB/s.",
+      "Interconnect: Host <-> NMC PCIe/CXL link bandwidth = 64.0 GB/s with 0.020 ms dispatch overhead.",
+      "Data Layout: Bank reorganization modeled at 48.0 GB/s with 0.020 ms overhead.",
+      "Honesty Notice: All figures are analytical estimates for compiler educational exploration and do not claim physical silicon measurements."
+    ],
+    "warnings": []
+  },
+  "reduction": {
+    "kernel_id": "reduction",
+    "kernel_name": "Vector Sum Reduction",
+    "source_code": "// Vector Sum Reduction Kernel\nfloat vector_reduction(const float* A, int N) {\n    float sum = 0.0f;\n    for (int i = 0; i < N; ++i) {\n        sum += A[i];\n    }\n    return sum;\n}",
+    "analysis": {
+      "loop_bounds": "i in [0, 2000000)",
+      "iterations": 2000000,
+      "estimated_operations": 2000000,
+      "estimated_bytes_read": 8000000,
+      "estimated_bytes_written": 4,
+      "total_bytes_moved": 8000004,
+      "arithmetic_intensity": 0.25,
+      "memory_access_pattern": "Streaming Sequential with Accumulator Register",
+      "reuse_factor": 1.0,
+      "is_bandwidth_bound": true,
+      "data_type": "float32",
+      "element_bytes": 4
+    },
+    "simplified_ir": [
+      {
+        "line": 1,
+        "label": "entry",
+        "opcode": "fn_entry",
+        "operands": "vector_reduction(ptr %A, i32 %N) -> float",
+        "comment": "Kernel entry point"
+      },
+      {
+        "line": 2,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.cond",
+        "comment": "Enter loop header"
+      },
+      {
+        "line": 3,
+        "label": "loop.cond",
+        "opcode": "phi",
+        "operands": "i32 [%i, %loop.inc], [0, %entry]",
+        "comment": "Induction variable i = 0"
+      },
+      {
+        "line": 4,
+        "label": null,
+        "opcode": "phi",
+        "operands": "float [%acc, %loop.inc], [0.0, %entry]",
+        "comment": "Accumulator register = 0.0"
+      },
+      {
+        "line": 5,
+        "label": null,
+        "opcode": "icmp_slt",
+        "operands": "%cmp = icmp slt i32 %i, %N",
+        "comment": "Check i < N"
+      },
+      {
+        "line": 6,
+        "label": null,
+        "opcode": "br_cond",
+        "operands": "i1 %cmp, label %loop.body, label %exit",
+        "comment": "Branch"
+      },
+      {
+        "line": 7,
+        "label": "loop.body",
+        "opcode": "gep",
+        "operands": "%ptr.a = getelementptr inbounds float, ptr %A, i32 %i",
+        "comment": "Compute &A[i] address"
+      },
+      {
+        "line": 8,
+        "label": null,
+        "opcode": "load",
+        "operands": "float %val = load float, ptr %ptr.a, align 4",
+        "comment": "DRAM read A[i]"
+      },
+      {
+        "line": 9,
+        "label": null,
+        "opcode": "fadd",
+        "operands": "float %acc.next = fadd float %acc, %val",
+        "comment": "Near-bank accumulation"
+      },
+      {
+        "line": 10,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.inc",
+        "comment": "Increment block"
+      },
+      {
+        "line": 11,
+        "label": "loop.inc",
+        "opcode": "add",
+        "operands": "i32 %i.next = add nuw nsw i32 %i, 1",
+        "comment": "i = i + 1"
+      },
+      {
+        "line": 12,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.cond",
+        "comment": "Loop back"
+      },
+      {
+        "line": 13,
+        "label": "exit",
+        "opcode": "ret",
+        "operands": "float %acc",
+        "comment": "Return final reduced scalar"
+      }
+    ],
+    "ir_text": "entry:       fn_entry   vector_reduction(ptr %A, i32 %N) -> float        ; Kernel entry point\n             br         label %loop.cond                                 ; Enter loop header\nloop.cond:   phi        i32 [%i, %loop.inc], [0, %entry]                 ; Induction variable i = 0\n             phi        float [%acc, %loop.inc], [0.0, %entry]           ; Accumulator register = 0.0\n             icmp_slt   %cmp = icmp slt i32 %i, %N                       ; Check i < N\n             br_cond    i1 %cmp, label %loop.body, label %exit           ; Branch\nloop.body:   gep        %ptr.a = getelementptr inbounds float, ptr %A, i32 %i ; Compute &A[i] address\n             load       float %val = load float, ptr %ptr.a, align 4     ; DRAM read A[i]\n             fadd       float %acc.next = fadd float %acc, %val          ; Near-bank accumulation\n             br         label %loop.inc                                  ; Increment block\nloop.inc:    add        i32 %i.next = add nuw nsw i32 %i, 1              ; i = i + 1\n             br         label %loop.cond                                 ; Loop back\nexit:        ret        float %acc                                       ; Return final reduced scalar",
+    "transformations": [
+      {
+        "name": "Loop Fusion",
+        "eligible": false,
+        "reason": "Kernel 'Vector Sum Reduction' lacks consecutive fusible loops or presents reduction/reduction-tree dependency.",
+        "potential_benefit": "None for standalone kernel."
+      },
+      {
+        "name": "Loop Tiling (Bank Blocking)",
+        "eligible": false,
+        "reason": "Streaming 1D kernel accesses elements once with zero temporal reuse; tiling adds index calculation overhead without cache reuse benefit.",
+        "potential_benefit": "None for 1D streaming workloads."
+      },
+      {
+        "name": "DRAM Bank Interleaving",
+        "eligible": true,
+        "reason": "Can partition array elements contiguously across distinct DRAM PIM banks (e.g. 16 or 64 banks) to maximize internal parallel memory bandwidth.",
+        "potential_benefit": "Maximizes internal aggregate DRAM throughput by distributing reads evenly across bank channels."
+      }
+    ],
+    "candidates": [
+      {
+        "strategy": "CPU-only",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.33015,
+        "speedup_vs_cpu": 1.0,
+        "components_ms": {
+          "compute_ms": 0.04444,
+          "memory_or_transfer_ms": 0.28571,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "Memory-bound on CPU bus",
+        "notes": "Standard CPU execution relying on host L1-L3 caches and memory bus."
+      },
+      {
+        "strategy": "Direct NMC offload",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.33083,
+        "speedup_vs_cpu": 0.998,
+        "components_ms": {
+          "compute_ms": 0.1125,
+          "memory_or_transfer_ms": 0.125,
+          "layout_conversion_ms": 0.04333,
+          "synchronization_ms": 0.01,
+          "overhead_ms": 0.04
+        },
+        "dominant_factor": "Host-Device Link Transfer",
+        "notes": "Directly maps kernel instructions to PIM processing units across DRAM banks."
+      },
+      {
+        "strategy": "NMC + Loop Fusion",
+        "valid": false,
+        "invalidation_reason": "Kernel 'reduction' does not have fusible loop pairs; cannot apply loop fusion.",
+        "estimated_total_ms": 0.0,
+        "speedup_vs_cpu": 0.0,
+        "components_ms": {
+          "compute_ms": 0.0,
+          "memory_or_transfer_ms": 0.0,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "N/A",
+        "notes": "Legality check failed: in-memory fusion requires compatible loop boundaries and lack of reduction dependencies."
+      },
+      {
+        "strategy": "NMC + Tiling",
+        "valid": false,
+        "invalidation_reason": "1D streaming kernel 'reduction' does not have temporal reuse; tiling adds loop overhead without cache benefit.",
+        "estimated_total_ms": 0.0,
+        "speedup_vs_cpu": 0.0,
+        "components_ms": {
+          "compute_ms": 0.0,
+          "memory_or_transfer_ms": 0.0,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "N/A",
+        "notes": "Legality check failed: loop tiling requires reuse across multiple iteration dimensions."
+      }
+    ],
+    "recommendation": {
+      "strategy": "CPU-only",
+      "estimated_cost_ms": 0.33015,
+      "speedup_vs_cpu": 1.0,
+      "reason": "CPU-only execution is selected (0.330 ms). Even though Near-Memory Computing offers higher internal DRAM bandwidth, the host-device transfer overhead, data layout conversion, and synchronization barriers surpass the compute benefit for this workload size.",
+      "key_tradeoffs": [
+        "Avoids host-to-device PCIe/CXL transfer overhead entirely.",
+        "Eliminates bank-interleaved data layout reorganization costs.",
+        "Best suited when data already resides in host L2/L3 caches or when payload is small."
+      ]
+    },
+    "chart_scaling": [
+      {
+        "input_size": 200000,
+        "cpu_ms": 0.033,
+        "nmc_ms": 0.0871,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 800000,
+        "cpu_ms": 0.1321,
+        "nmc_ms": 0.1683,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 2000000,
+        "cpu_ms": 0.3302,
+        "nmc_ms": 0.3308,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 4000000,
+        "cpu_ms": 0.6603,
+        "nmc_ms": 0.6017,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 8000000,
+        "cpu_ms": 1.3206,
+        "nmc_ms": 1.1433,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 16000000,
+        "cpu_ms": 2.6413,
+        "nmc_ms": 2.2267,
+        "transformed_ms": null
+      }
+    ],
+    "chart_sensitivity": [
+      {
+        "bandwidth_gbps": 30.0,
+        "cpu_ms": 0.3302,
+        "nmc_ms": 0.5475
+      },
+      {
+        "bandwidth_gbps": 50.0,
+        "cpu_ms": 0.3302,
+        "nmc_ms": 0.4408
+      },
+      {
+        "bandwidth_gbps": 80.0,
+        "cpu_ms": 0.3302,
+        "nmc_ms": 0.3808
+      },
+      {
+        "bandwidth_gbps": 110.0,
+        "cpu_ms": 0.3302,
+        "nmc_ms": 0.3536
+      },
+      {
+        "bandwidth_gbps": 140.0,
+        "cpu_ms": 0.3302,
+        "nmc_ms": 0.338
+      },
+      {
+        "bandwidth_gbps": 160.0,
+        "cpu_ms": 0.3302,
+        "nmc_ms": 0.3308
+      },
+      {
+        "bandwidth_gbps": 180.0,
+        "cpu_ms": 0.3302,
+        "nmc_ms": 0.3253
+      },
+      {
+        "bandwidth_gbps": 220.0,
+        "cpu_ms": 0.3302,
+        "nmc_ms": 0.3172
+      },
+      {
+        "bandwidth_gbps": 260.0,
+        "cpu_ms": 0.3302,
+        "nmc_ms": 0.3116
+      }
+    ],
+    "crossover_elements": 2000000,
+    "crossover_point_label": "Crossover point ~2.00M Elements",
+    "assumptions": [
+      "Analytical Cost Model: All reported times in milliseconds (ms) calculated using explicit first-principles equations.",
+      "CPU Model: Effective compute = 45.0 GFLOPS, Host DRAM bandwidth = 28.0 GB/s.",
+      "NMC Model: Aggregate Near-Memory compute = 32.0 GFLOPS, Internal DRAM bank bandwidth = 160.0 GB/s.",
+      "Interconnect: Host <-> NMC PCIe/CXL link bandwidth = 64.0 GB/s with 0.020 ms dispatch overhead.",
+      "Data Layout: Bank reorganization modeled at 48.0 GB/s with 0.020 ms overhead.",
+      "Honesty Notice: All figures are analytical estimates for compiler educational exploration and do not claim physical silicon measurements."
+    ],
+    "warnings": []
+  },
+  "elementwise_mul": {
+    "kernel_id": "elementwise_mul",
+    "kernel_name": "Element-wise Vector Multiply",
+    "source_code": "// Element-wise Vector Multiplication\nvoid elementwise_mul(const float* A, const float* B, float* C, int N) {\n    #pragma loop_bound min(100) max(16777216)\n    for (int i = 0; i < N; ++i) {\n        C[i] = A[i] * B[i];\n    }\n}",
+    "analysis": {
+      "loop_bounds": "i in [0, 2000000)",
+      "iterations": 2000000,
+      "estimated_operations": 2000000,
+      "estimated_bytes_read": 16000000,
+      "estimated_bytes_written": 8000000,
+      "total_bytes_moved": 24000000,
+      "arithmetic_intensity": 0.0833,
+      "memory_access_pattern": "Sequential Array Access",
+      "reuse_factor": 1.0,
+      "is_bandwidth_bound": true,
+      "data_type": "float32",
+      "element_bytes": 4
+    },
+    "simplified_ir": [
+      {
+        "line": 1,
+        "label": "entry",
+        "opcode": "fn_entry",
+        "operands": "axpy(float %alpha, ptr %X, ptr %Y, i32 %N)",
+        "comment": "AXPY kernel"
+      },
+      {
+        "line": 2,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.cond",
+        "comment": "Enter loop"
+      },
+      {
+        "line": 3,
+        "label": "loop.cond",
+        "opcode": "phi",
+        "operands": "i32 [%i, %loop.inc], [0, %entry]",
+        "comment": "Induction i = 0"
+      },
+      {
+        "line": 4,
+        "label": null,
+        "opcode": "icmp_slt",
+        "operands": "%cmp = icmp slt i32 %i, %N",
+        "comment": "Check i < N"
+      },
+      {
+        "line": 5,
+        "label": null,
+        "opcode": "br_cond",
+        "operands": "i1 %cmp, label %loop.body, label %exit",
+        "comment": "Branch"
+      },
+      {
+        "line": 6,
+        "label": "loop.body",
+        "opcode": "gep",
+        "operands": "%ptr.x = getelementptr inbounds float, ptr %X, i32 %i",
+        "comment": "Address &X[i]"
+      },
+      {
+        "line": 7,
+        "label": null,
+        "opcode": "load",
+        "operands": "float %val.x = load float, ptr %ptr.x, align 4",
+        "comment": "Load X[i]"
+      },
+      {
+        "line": 8,
+        "label": null,
+        "opcode": "gep",
+        "operands": "%ptr.y = getelementptr inbounds float, ptr %Y, i32 %i",
+        "comment": "Address &Y[i]"
+      },
+      {
+        "line": 9,
+        "label": null,
+        "opcode": "load",
+        "operands": "float %val.y = load float, ptr %ptr.y, align 4",
+        "comment": "Load Y[i]"
+      },
+      {
+        "line": 10,
+        "label": null,
+        "opcode": "fmul",
+        "operands": "float %scaled = fmul float %alpha, %val.x",
+        "comment": "Scale alpha * X[i]"
+      },
+      {
+        "line": 11,
+        "label": null,
+        "opcode": "fadd",
+        "operands": "float %res = fadd float %scaled, %val.y",
+        "comment": "Add to Y[i]"
+      },
+      {
+        "line": 12,
+        "label": null,
+        "opcode": "store",
+        "operands": "store float %res, ptr %ptr.y, align 4",
+        "comment": "Writeback Y[i]"
+      },
+      {
+        "line": 13,
+        "label": "loop.inc",
+        "opcode": "add",
+        "operands": "i32 %i.next = add nuw nsw i32 %i, 1",
+        "comment": "i = i + 1"
+      },
+      {
+        "line": 14,
+        "label": null,
+        "opcode": "br",
+        "operands": "label %loop.cond",
+        "comment": "Loop back"
+      },
+      {
+        "line": 15,
+        "label": "exit",
+        "opcode": "ret",
+        "operands": "void",
+        "comment": "Function return"
+      }
+    ],
+    "ir_text": "entry:       fn_entry   axpy(float %alpha, ptr %X, ptr %Y, i32 %N)       ; AXPY kernel\n             br         label %loop.cond                                 ; Enter loop\nloop.cond:   phi        i32 [%i, %loop.inc], [0, %entry]                 ; Induction i = 0\n             icmp_slt   %cmp = icmp slt i32 %i, %N                       ; Check i < N\n             br_cond    i1 %cmp, label %loop.body, label %exit           ; Branch\nloop.body:   gep        %ptr.x = getelementptr inbounds float, ptr %X, i32 %i ; Address &X[i]\n             load       float %val.x = load float, ptr %ptr.x, align 4   ; Load X[i]\n             gep        %ptr.y = getelementptr inbounds float, ptr %Y, i32 %i ; Address &Y[i]\n             load       float %val.y = load float, ptr %ptr.y, align 4   ; Load Y[i]\n             fmul       float %scaled = fmul float %alpha, %val.x        ; Scale alpha * X[i]\n             fadd       float %res = fadd float %scaled, %val.y          ; Add to Y[i]\n             store      store float %res, ptr %ptr.y, align 4            ; Writeback Y[i]\nloop.inc:    add        i32 %i.next = add nuw nsw i32 %i, 1              ; i = i + 1\n             br         label %loop.cond                                 ; Loop back\nexit:        ret        void                                             ; Function return",
+    "transformations": [
+      {
+        "name": "Loop Fusion",
+        "eligible": false,
+        "reason": "Kernel 'Element-wise Vector Multiply' lacks consecutive fusible loops or presents reduction/reduction-tree dependency.",
+        "potential_benefit": "None for standalone kernel."
+      },
+      {
+        "name": "Loop Tiling (Bank Blocking)",
+        "eligible": false,
+        "reason": "Streaming 1D kernel accesses elements once with zero temporal reuse; tiling adds index calculation overhead without cache reuse benefit.",
+        "potential_benefit": "None for 1D streaming workloads."
+      },
+      {
+        "name": "DRAM Bank Interleaving",
+        "eligible": true,
+        "reason": "Can partition array elements contiguously across distinct DRAM PIM banks (e.g. 16 or 64 banks) to maximize internal parallel memory bandwidth.",
+        "potential_benefit": "Maximizes internal aggregate DRAM throughput by distributing reads evenly across bank channels."
+      }
+    ],
+    "candidates": [
+      {
+        "strategy": "CPU-only",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.90158,
+        "speedup_vs_cpu": 1.0,
+        "components_ms": {
+          "compute_ms": 0.04444,
+          "memory_or_transfer_ms": 0.85714,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "Memory-bound on CPU bus",
+        "notes": "Standard CPU execution relying on host L1-L3 caches and memory bus."
+      },
+      {
+        "strategy": "Direct NMC offload",
+        "valid": true,
+        "invalidation_reason": null,
+        "estimated_total_ms": 0.77417,
+        "speedup_vs_cpu": 1.165,
+        "components_ms": {
+          "compute_ms": 0.2125,
+          "memory_or_transfer_ms": 0.375,
+          "layout_conversion_ms": 0.13667,
+          "synchronization_ms": 0.01,
+          "overhead_ms": 0.04
+        },
+        "dominant_factor": "Host-Device Link Transfer",
+        "notes": "Directly maps kernel instructions to PIM processing units across DRAM banks."
+      },
+      {
+        "strategy": "NMC + Loop Fusion",
+        "valid": false,
+        "invalidation_reason": "Kernel 'elementwise_mul' does not have fusible loop pairs; cannot apply loop fusion.",
+        "estimated_total_ms": 0.0,
+        "speedup_vs_cpu": 0.0,
+        "components_ms": {
+          "compute_ms": 0.0,
+          "memory_or_transfer_ms": 0.0,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "N/A",
+        "notes": "Legality check failed: in-memory fusion requires compatible loop boundaries and lack of reduction dependencies."
+      },
+      {
+        "strategy": "NMC + Tiling",
+        "valid": false,
+        "invalidation_reason": "1D streaming kernel 'elementwise_mul' does not have temporal reuse; tiling adds loop overhead without cache benefit.",
+        "estimated_total_ms": 0.0,
+        "speedup_vs_cpu": 0.0,
+        "components_ms": {
+          "compute_ms": 0.0,
+          "memory_or_transfer_ms": 0.0,
+          "layout_conversion_ms": 0.0,
+          "synchronization_ms": 0.0,
+          "overhead_ms": 0.0
+        },
+        "dominant_factor": "N/A",
+        "notes": "Legality check failed: loop tiling requires reuse across multiple iteration dimensions."
+      }
+    ],
+    "recommendation": {
+      "strategy": "Direct NMC offload",
+      "estimated_cost_ms": 0.77417,
+      "speedup_vs_cpu": 1.16,
+      "reason": "Direct NMC offload is recommended (0.774 ms, 1.16x speedup). The kernel has low arithmetic intensity (0.083 FLOP/B) and high data volume, allowing NMC's massive internal DRAM bank bandwidth to drastically outperform CPU memory bus limits.",
+      "key_tradeoffs": [
+        "Leverages high internal DRAM bank bandwidth (eliminating off-chip bus bottleneck).",
+        "Requires initial host-to-device data transfer and synchronization barrier.",
+        "High data volume (22.89 MB) amortizes dispatch overheads."
+      ]
+    },
+    "chart_scaling": [
+      {
+        "input_size": 70000,
+        "cpu_ms": 0.0316,
+        "nmc_ms": 0.0946,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 280000,
+        "cpu_ms": 0.1262,
+        "nmc_ms": 0.1686,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 700000,
+        "cpu_ms": 0.3156,
+        "nmc_ms": 0.3165,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 1400000,
+        "cpu_ms": 0.6311,
+        "nmc_ms": 0.5629,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 2000000,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7742,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 2800000,
+        "cpu_ms": 1.2622,
+        "nmc_ms": 1.0558,
+        "transformed_ms": null
+      },
+      {
+        "input_size": 5600000,
+        "cpu_ms": 2.5244,
+        "nmc_ms": 2.0417,
+        "transformed_ms": null
+      }
+    ],
+    "chart_sensitivity": [
+      {
+        "bandwidth_gbps": 30.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 1.4242
+      },
+      {
+        "bandwidth_gbps": 50.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 1.1042
+      },
+      {
+        "bandwidth_gbps": 80.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.9242
+      },
+      {
+        "bandwidth_gbps": 110.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.8423
+      },
+      {
+        "bandwidth_gbps": 140.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7956
+      },
+      {
+        "bandwidth_gbps": 160.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7742
+      },
+      {
+        "bandwidth_gbps": 180.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7575
+      },
+      {
+        "bandwidth_gbps": 220.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7333
+      },
+      {
+        "bandwidth_gbps": 260.0,
+        "cpu_ms": 0.9016,
+        "nmc_ms": 0.7165
+      }
+    ],
+    "crossover_elements": 700000,
+    "crossover_point_label": "Crossover point ~700K Elements",
+    "assumptions": [
+      "Analytical Cost Model: All reported times in milliseconds (ms) calculated using explicit first-principles equations.",
+      "CPU Model: Effective compute = 45.0 GFLOPS, Host DRAM bandwidth = 28.0 GB/s.",
+      "NMC Model: Aggregate Near-Memory compute = 32.0 GFLOPS, Internal DRAM bank bandwidth = 160.0 GB/s.",
+      "Interconnect: Host <-> NMC PCIe/CXL link bandwidth = 64.0 GB/s with 0.020 ms dispatch overhead.",
+      "Data Layout: Bank reorganization modeled at 48.0 GB/s with 0.020 ms overhead.",
+      "Honesty Notice: All figures are analytical estimates for compiler educational exploration and do not claim physical silicon measurements."
+    ],
+    "warnings": []
+  }
+}

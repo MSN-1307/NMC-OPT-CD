@@ -48,6 +48,12 @@ yarn-error.log*
 .vscode/
 .idea/
 *.swp
+*.DS_Store
+Thumbs.db
+
+# Generated dataset binaries
+datasets/generated/
+*.bin
 *.swo
 .DS_Store
 Thumbs.db
