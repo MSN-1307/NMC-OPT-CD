@@ -43,7 +43,7 @@ Near-Memory Computing (NMC) and Processing-In-Memory (PIM) paradigms mitigate th
 
 | Document | Description | Format & Scope | Direct Link |
 | :--- | :--- | :--- | :--- |
-| **IEEE Manuscript (Draft 2)** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | Complete IEEE Access Publication Manuscript | [NMC-OPT-Manuscript-IEEE.pdf](docs/NMC-OPT-Manuscript-IEEE.pdf) |
+| **IEEE Manuscript (Draft 2)** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | Complete IEEE Access Publication Manuscript | [NMC-OPT-Manuscript-IEEE-Access(Draft-2).pdf](docs/NMC-OPT-Manuscript-IEEE-Access(Draft-2).pdf) |
 | **Compiler Methodology** | *Compiler Analytical Cost Model & Target Placement Methodology* | Formal Mathematical Formulation | [NMC_Opt_Methodology_Document.pdf](docs/NMC_Opt_Methodology_Document.pdf) |
 | **Scientific Novelty** | *Scientific Novelty & Architectural Innovations* | Research Contributions & State-of-the-Art Audit | [NMC_Opt_Novelty_Document.pdf](docs/NMC_Opt_Novelty_Document.pdf) |
 | **Execution Guide** | *Installation, Configuration & Execution Guide* | Complete Local & CLI Operations Manual | [NMC_Opt_Execution_Guide.pdf](docs/NMC_Opt_Execution_Guide.pdf) |
@@ -299,7 +299,7 @@ Comprehensive analytical outputs are archived in [`results/`](results/):
 
 All academic publications and engineering reports are preserved in the [`docs/`](docs/) directory:
 
-* [**NMC-OPT-Manuscript-IEEE.pdf**](docs/NMC-OPT-Manuscript-IEEE.pdf): **Research Manuscript (Draft 2)** – 19-page IEEE Access publication document detailing system architecture, SSA IR design, bank interleaving model, and empirical benchmarks.
+* [**NMC-OPT-Manuscript-IEEE-Access(Draft-2).pdf**](docs/NMC-OPT-Manuscript-IEEE-Access(Draft-2).pdf): **Research Manuscript (Draft 2)** – 19-page IEEE Access publication document detailing system architecture, SSA IR design, bank interleaving model, and empirical benchmarks.
 * [**NMC_Opt_Execution_Guide.pdf**](docs/NMC_Opt_Execution_Guide.pdf): System operations guide.
 * [**NMC_Opt_Methodology_Document.pdf**](docs/NMC_Opt_Methodology_Document.pdf): Mathematical cost model derivations.
 * [**NMC_Opt_Novelty_Document.pdf**](docs/NMC_Opt_Novelty_Document.pdf): State-of-the-art comparison and novelty claims.
