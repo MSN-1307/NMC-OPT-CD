@@ -25,7 +25,7 @@ The following compliance matrix maps all evaluation requirements directly to the
 | **7** | **Configuration Files** | ✅ **Available** | [`.env.example`](.env.example)<br>[`backend/.env.example`](backend/.env.example)<br>[`frontend/.env.example`](frontend/.env.example) | Environment configurations and hardware architectural simulation templates. |
 | **8** | **Execution Scripts** | ✅ **Available** | [`run_dev.bat`](run_dev.bat), [`run_dev.ps1`](run_dev.ps1), [`run_dev.sh`](run_dev.sh)<br>[`run_tests.bat`](run_tests.bat), [`run_tests.sh`](run_tests.sh)<br>[`backend/cli.py`](backend/cli.py) | 1-Click launcher scripts, CLI evaluation pipeline, and automated test runners. |
 | **9** | **Results & Metrics** | ✅ **Available** | [`results/`](results/) | Tabulated metrics [`benchmark_summary.csv`](results/benchmark_summary.csv) and empirical outputs [`benchmark_summary.json`](results/benchmark_summary.json). |
-| **10** | **Documentation (Manuscript Draft 2)** | ✅ **Available** | [**NMC-OPT-Manuscript-IEEE.pdf**](docs/NMC-OPT-Manuscript-IEEE.pdf) | Academic research manuscript (Final Draft 2, IEEE Access format) and methodology specifications in [`docs/`](docs/). |
+| **10** | **Documentation (Manuscript Draft 2)** | ✅ **Available** | [**NMC-OPT-Manuscript-IEEE.pdf**](docs/NMC-OPT-Manuscript-IEEE-Access(Draft-2).pdf) | Academic research manuscript (Final Draft 2, IEEE Access format) and methodology specifications in [`docs/`](docs/). |
 | **11** | **Demo Video (4–7 mins)** | ⏳ *In Progress* | [**Demo Video Link**](#11-demo-video-walkthrough) | Full system demonstration walkthrough video (Ast parsing, cost model, 3D DRAM visualizer, CLI). |
 
 ---
