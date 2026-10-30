@@ -16,7 +16,7 @@ The following compliance matrix maps all evaluation requirements directly to the
 
 | # | Evaluation Requirement | Status | Repository Location / Direct Link | Description |
 |:---:|:---|:---:|:---|:---|
-| **1** | **Manuscript LaTeX Source (zip format)** | ⏳ *In Progress* | [`docs/manuscript_latex.zip`](docs/) | Complete Overleaf-ready LaTeX package (figures, `.bib`, `.tex` files). *(Uploading)* |
+| **1** | **Manuscript LaTeX Source (zip format)** | ✅ **Available** | [`docs/NMC-OPT-Manuscript-LaTeX.zip`](docs/NMC-OPT-Manuscript-LaTeX.zip) | Complete Overleaf-ready LaTeX package with `main.tex`, 7 section files, 14 architectural diagrams/figures, and logos. |
 | **2** | **Source Code** | ✅ **Available** | [`backend/`](backend/) & [`frontend/`](frontend/) | Complete production implementation of compiler AST parser, IR generator, cost model, and interactive UI. |
 | **3** | **README.md** | ✅ **Available** | [`README.md`](README.md) | Comprehensive technical documentation, architecture, execution manual, and reproduction guide. |
 | **4** | **Dependencies** | ✅ **Available** | [`backend/requirements.txt`](backend/requirements.txt)<br>[`frontend/package.json`](frontend/package.json) | Complete list of libraries, frameworks, and pinned version specifications. |

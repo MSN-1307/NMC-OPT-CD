@@ -19,12 +19,14 @@ This directory houses the formal technical documentation, academic manuscripts, 
 
 ## 2. LaTeX Source Code Package (Overleaf Compilable)
 
-* **Location:** `docs/manuscript_latex.zip` *(Pending upload / in progress)*
-* **Contents:**
-  - Full `.tex` source files (IEEE / ACM template)
-  - All embedded diagrams, TikZ figures, and SVG/PNG assets
-  - Complete `.bib` BibTeX citation database
-  - Fully compilable without warnings on Overleaf or local TeX Live / MiKTeX.
+* **Location:** [`docs/NMC-OPT-Manuscript-LaTeX.zip`](./NMC-OPT-Manuscript-LaTeX.zip)
+* **Status:** ✅ **Available & Verified**
+* **Package Structure:**
+  - `main.tex` (Root IEEE Access / Template driver)
+  - `sections/` (`01_introduction.tex`, `02_related_work.tex`, `03_proposed_system.tex`, `04_results.tex`, `05_conclusion_backmatter.tex`, `06_references.tex`, `07_biographies.tex`)
+  - `figures/` (Full vector & raster diagrams: `fig01` through `fig14` covering architecture, pipeline, striping, roofline, breakdowns)
+  - `logo/` & `photos/` (IEEE logos and author biography assets)
+* **Compilation:** Directly importable into [Overleaf](https://www.overleaf.com/) or local TeX Live/MiKTeX distribution (`pdflatex main.tex`).
 
 ---
 
