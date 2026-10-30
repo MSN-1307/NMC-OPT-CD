@@ -25,7 +25,7 @@ The following compliance matrix maps all evaluation requirements directly to the
 | **7** | **Configuration Files** | ✅ **Available** | [`.env.example`](.env.example)<br>[`backend/.env.example`](backend/.env.example)<br>[`frontend/.env.example`](frontend/.env.example) | Environment configurations and hardware architectural simulation templates. |
 | **8** | **Execution Scripts** | ✅ **Available** | [`run_dev.bat`](run_dev.bat), [`run_dev.ps1`](run_dev.ps1), [`run_dev.sh`](run_dev.sh)<br>[`run_tests.bat`](run_tests.bat), [`run_tests.sh`](run_tests.sh)<br>[`backend/cli.py`](backend/cli.py) | 1-Click launcher scripts, CLI evaluation pipeline, and automated test runners. |
 | **9** | **Results & Metrics** | ✅ **Available** | [`results/`](results/) | Tabulated metrics [`benchmark_summary.csv`](results/benchmark_summary.csv) and empirical outputs [`benchmark_summary.json`](results/benchmark_summary.json). |
-| **10** | **Documentation (Manuscript Draft 2)** | ✅ **Available** | [**NMC-OPT-Manuscript.pdf**](docs/NMC-OPT-Manuscript.pdf)<br>[**NMC-OPT-Manuscript-IEEE.pdf**](docs/NMC-OPT-Manuscript-IEEE.pdf) | Academic research manuscripts (Draft 2), IEEE two-column paper, and methodology specifications in [`docs/`](docs/). |
+| **10** | **Documentation (Manuscript Draft 2)** | ✅ **Available** | [**NMC-OPT-Manuscript-IEEE.pdf**](docs/NMC-OPT-Manuscript-IEEE.pdf) | Academic research manuscript (Final Draft 2, IEEE Access format) and methodology specifications in [`docs/`](docs/). |
 | **11** | **Demo Video (4–7 mins)** | ⏳ *In Progress* | [**Demo Video Link**](#11-demo-video-walkthrough) | Full system demonstration walkthrough video (Ast parsing, cost model, 3D DRAM visualizer, CLI). |
 
 ---
@@ -43,8 +43,7 @@ Near-Memory Computing (NMC) and Processing-In-Memory (PIM) paradigms mitigate th
 
 | Document | Description | Format & Scope | Direct Link |
 | :--- | :--- | :--- | :--- |
-| **IEEE Manuscript** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | 11-Page IEEE Format Manuscript | [NMC-OPT-Manuscript-IEEE.pdf](docs/NMC-OPT-Manuscript-IEEE.pdf) |
-| **Comprehensive Manuscript (Draft 2)** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | 28-Page Complete Institutional Manuscript | [NMC-OPT-Manuscript.pdf](docs/NMC-OPT-Manuscript.pdf) |
+| **IEEE Manuscript (Draft 2)** | *NMC-OPT: Intelligent Compiler Optimization for Near-Memory Computing* | Complete IEEE Access Publication Manuscript | [NMC-OPT-Manuscript-IEEE.pdf](docs/NMC-OPT-Manuscript-IEEE.pdf) |
 | **Compiler Methodology** | *Compiler Analytical Cost Model & Target Placement Methodology* | Formal Mathematical Formulation | [NMC_Opt_Methodology_Document.pdf](docs/NMC_Opt_Methodology_Document.pdf) |
 | **Scientific Novelty** | *Scientific Novelty & Architectural Innovations* | Research Contributions & State-of-the-Art Audit | [NMC_Opt_Novelty_Document.pdf](docs/NMC_Opt_Novelty_Document.pdf) |
 | **Execution Guide** | *Installation, Configuration & Execution Guide* | Complete Local & CLI Operations Manual | [NMC_Opt_Execution_Guide.pdf](docs/NMC_Opt_Execution_Guide.pdf) |
@@ -300,8 +299,7 @@ Comprehensive analytical outputs are archived in [`results/`](results/):
 
 All academic publications and engineering reports are preserved in the [`docs/`](docs/) directory:
 
-* [**NMC-OPT-Manuscript.pdf**](docs/NMC-OPT-Manuscript.pdf): **Full Manuscript (Draft 2)** – 28-page complete document detailing system architecture, SSA IR design, bank interleaving model, and empirical benchmarks.
-* [**NMC-OPT-Manuscript-IEEE.pdf**](docs/NMC-OPT-Manuscript-IEEE.pdf): **IEEE Two-Column Manuscript** – Standard conference publication format.
+* [**NMC-OPT-Manuscript-IEEE.pdf**](docs/NMC-OPT-Manuscript-IEEE.pdf): **Research Manuscript (Draft 2)** – 19-page IEEE Access publication document detailing system architecture, SSA IR design, bank interleaving model, and empirical benchmarks.
 * [**NMC_Opt_Execution_Guide.pdf**](docs/NMC_Opt_Execution_Guide.pdf): System operations guide.
 * [**NMC_Opt_Methodology_Document.pdf**](docs/NMC_Opt_Methodology_Document.pdf): Mathematical cost model derivations.
 * [**NMC_Opt_Novelty_Document.pdf**](docs/NMC_Opt_Novelty_Document.pdf): State-of-the-art comparison and novelty claims.

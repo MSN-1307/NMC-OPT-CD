@@ -8,8 +8,7 @@ This directory houses the formal technical documentation, academic manuscripts, 
 
 | Document | Format | Description |
 |:---|:---:|:---|
-| [**NMC-OPT-Manuscript.pdf**](./NMC-OPT-Manuscript.pdf) | PDF | **Academic Research Manuscript (Draft 2)** – Full research publication documenting motivation, compiler IR architecture, analytical cost modeling, and empirical speedups. |
-| [**NMC-OPT-Manuscript-IEEE.pdf**](./NMC-OPT-Manuscript-IEEE.pdf) | PDF | **IEEE Two-Column Formatted Manuscript** – Standard conference-ready publication format. |
+| [**NMC-OPT-Manuscript-IEEE.pdf**](./NMC-OPT-Manuscript-IEEE.pdf) | PDF | **Academic Research Manuscript (Draft 2)** – 19-page IEEE Access publication manuscript documenting motivation, compiler IR architecture, analytical cost modeling, and empirical speedups. |
 | [**NMC_Opt_Execution_Guide.pdf**](./NMC_Opt_Execution_Guide.pdf) | PDF | **System Execution & User Guide** – Complete operational instructions for CLI and Web Workbench. |
 | [**NMC_Opt_Methodology_Document.pdf**](./NMC_Opt_Methodology_Document.pdf) | PDF | **Compiler & Hardware Methodology** – Detailed derivation of memory bus constraints, TSV bandwidth, and first-principles equations. |
 | [**NMC_Opt_Novelty_Document.pdf**](./NMC_Opt_Novelty_Document.pdf) | PDF | **Novelty & Contribution Analysis** – Highlights differentiation from legacy CPU-only compilation and fixed offload heuristics. |
