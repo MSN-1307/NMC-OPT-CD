@@ -310,12 +310,15 @@ All academic publications and engineering reports are preserved in the [`docs/`]
 
 * **Target Duration:** 4 to 7 minutes
 * **Walkthrough Coverage:**
-  1. Live C source code parsing and AST loop trip count extraction
-  2. Intermediate Representation (SSA 3-address quadruple table) generation
-  3. Analytical cost modeling and target placement verdict comparison
-  4. Real-time sensitivity parameter sweeps (Interconnect bandwidth, DRAM vaults)
-  5. Interactive 3D DRAM memory bank topology viewer
-  6. Terminal execution via `backend/cli.py`
+  - **Walkthrough Coverage:**
+  1. Home Hub overview, navigation across core workspaces, and live FastAPI compiler engine status
+  2. Optimization Workbench: benchmark kernel selection, custom C loop uploads, workload dimension configuration, and hardware scenario selection (DDR4, DDR5, CXL 3.0)
+  3. Compiler-driven CPU vs. Near-Memory Computing (NMC) placement analysis, estimated speedup, and configurable cost model
+  4. Interactive performance analytics featuring eight graphs covering strategy comparison, input scaling, latency breakdown, energy consumption, roofline analysis, interconnect sensitivity, DRAM bank contention, and DPU scaling
+  5. Seven-stage compiler decision pipeline, including C source analysis, loop and memory analysis, and SSA intermediate representation generation
+  6. Memory Layout Simulator demonstrating host-to-memory data movement, PCIe/CXL transfers, bank interleaving, and parallel in-DRAM PIM execution
+  7. Compiler Copilot for AI-assisted explanations of compiler and Near-Memory Computing concepts
+  8. Execution Guide, backend diagnostics, CLI execution, demo-profile sign-in, persistent sessions, and light/dark themes
 * **Video Link:** https://github.com/MSN-1307/NMC-OPT-CD/blob/main/NMC_OPT_Studio_Demo_Video.mp4
 
 ---
