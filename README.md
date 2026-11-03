@@ -310,7 +310,6 @@ All academic publications and engineering reports are preserved in the [`docs/`]
 
 * **Target Duration:** 4 to 7 minutes
 * **Walkthrough Coverage:**
-  - **Walkthrough Coverage:**
   1. Home Hub overview, navigation across core workspaces, and live FastAPI compiler engine status
   2. Optimization Workbench: benchmark kernel selection, custom C loop uploads, workload dimension configuration, and hardware scenario selection (DDR4, DDR5, CXL 3.0)
   3. Compiler-driven CPU vs. Near-Memory Computing (NMC) placement analysis, estimated speedup, and configurable cost model
